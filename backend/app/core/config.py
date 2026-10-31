@@ -13,6 +13,12 @@ class Settings(BaseSettings):
     HOST: str = "127.0.0.1"
     CORS_ORIGINS: List[str] = ["http://localhost:3000"]
 
+    # JWT & Security Configuration
+    JWT_SECRET_KEY: str = "brightloop-insecure-dev-secret-change-in-prod-2026"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
+    BOOTSTRAP_ADMIN_TOKEN: str = "brightloop-bootstrap-admin-secret-2026"
+
     # Database Configuration
     POSTGRES_USER: str = "brightloop_app"
     POSTGRES_PASSWORD: str = "brightloop_dev_password"
@@ -28,6 +34,26 @@ class Settings(BaseSettings):
                 f"postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@"
                 f"{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
             )
+        return self
+
+    @model_validator(mode="after")
+    def validate_production_security(self) -> "Settings":
+        if self.ENVIRONMENT.lower() == "production":
+            insecure_defaults = {
+                "brightloop-insecure-dev-secret-change-in-prod-2026",
+                "secret",
+                "changeme",
+                "password",
+                "",
+            }
+            if self.JWT_SECRET_KEY in insecure_defaults or len(self.JWT_SECRET_KEY) < 32:
+                raise ValueError(
+                    "In production, JWT_SECRET_KEY must be a cryptographically strong secret of at least 32 characters."
+                )
+            if self.BOOTSTRAP_ADMIN_TOKEN == "brightloop-bootstrap-admin-secret-2026":
+                raise ValueError(
+                    "In production, default BOOTSTRAP_ADMIN_TOKEN cannot be used."
+                )
         return self
 
     model_config = SettingsConfigDict(
