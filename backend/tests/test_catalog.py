@@ -102,7 +102,7 @@ def test_product_crud_and_rbac(client: TestClient, db_session: Session):
     assert prod_data["base_sales_price"] == "1500.0000"
 
     # 3. Staff can list and retrieve
-    resp = client.get("/api/v1/products/", headers=staff_headers)
+    resp = client.get("/api/v1/products/?page_size=100", headers=staff_headers)
     assert resp.status_code == 200
     items = resp.json()["items"]
     assert any(p["id"] == product_id for p in items)
@@ -224,7 +224,7 @@ def test_plan_lifecycle_and_constraints(client: TestClient, db_session: Session)
     assert resp.status_code == 409
 
     # 5. Staff lists and views
-    resp = client.get("/api/v1/plans/", headers=staff_headers)
+    resp = client.get("/api/v1/plans/?page_size=100", headers=staff_headers)
     assert resp.status_code == 200
     assert any(p["id"] == plan_id for p in resp.json()["items"])
 

@@ -1,9 +1,9 @@
 """
 Brightloop Demo Data Seeding Script (Idempotent)
 Populates database with realistic enterprise data across all three roles:
-- Administrator (admin@brightloop.local)
-- Operations Staff (staff1@brightloop.local, staff2@brightloop.local)
-- Customer Self-Service Accounts (customer@acme.local, billing@globaldynamics.local)
+- Administrator (admin@example.com)
+- Operations Staff (staff1@example.com, staff2@example.com)
+- Customer Self-Service Accounts (customer.acme@example.com, customer.global@example.com)
 Including Products, Plans, Taxes, Discounts, Subscriptions, Invoices, Payments, and Audit Trail.
 """
 
@@ -55,7 +55,7 @@ def seed():
                 currency="USD",
                 default_payment_terms_days=30,
                 billing_timezone="Asia/Kolkata",
-                contact_email="support@brightloop.local",
+                contact_email="support@example.com",
                 contact_phone="+1 800-555-LOOP",
                 address="100 Innovation Blvd, Suite 500, San Francisco, CA 94105",
             )
@@ -69,11 +69,11 @@ def seed():
         # 2. Users (Admin, Staff, Customers)
         # -------------------------------------------------------------
         users_def = [
-            ("admin@brightloop.local", "Brightloop Administrator", "ADMIN", "AdminPass123!"),
-            ("staff1@brightloop.local", "Sarah Jenkins (Billing Operations)", "STAFF", "StaffPass123!"),
-            ("staff2@brightloop.local", "Marcus Vance (Account Manager)", "STAFF", "StaffPass123!"),
-            ("customer@acme.local", "Alex Rivera (Acme VP)", "CUSTOMER", "CustomerPass123!"),
-            ("billing@globaldynamics.local", "David Kim (Finance Controller)", "CUSTOMER", "CustomerPass123!"),
+            ("admin@example.com", "Brightloop Administrator", "ADMIN", "AdminPass123!"),
+            ("staff1@example.com", "Sarah Jenkins (Billing Operations)", "STAFF", "StaffPass123!"),
+            ("staff2@example.com", "Marcus Vance (Account Manager)", "STAFF", "StaffPass123!"),
+            ("customer.acme@example.com", "Alex Rivera (Acme VP)", "CUSTOMER", "CustomerPass123!"),
+            ("customer.global@example.com", "David Kim (Finance Controller)", "CUSTOMER", "CustomerPass123!"),
         ]
 
         user_map = {}
@@ -95,10 +95,10 @@ def seed():
                 logger.info(f"User already present: {email}")
             user_map[email] = u
 
-        admin_user = user_map["admin@brightloop.local"]
-        staff_user = user_map["staff1@brightloop.local"]
-        cust_user_1 = user_map["customer@acme.local"]
-        cust_user_2 = user_map["billing@globaldynamics.local"]
+        admin_user = user_map["admin@example.com"]
+        staff_user = user_map["staff1@example.com"]
+        cust_user_1 = user_map["customer.acme@example.com"]
+        cust_user_2 = user_map["customer.global@example.com"]
 
         # -------------------------------------------------------------
         # 3. Customer Organizations
@@ -106,7 +106,7 @@ def seed():
         customers_def = [
             {
                 "company_name": "Acme Enterprises Ltd",
-                "contact_email": "customer@acme.local",
+                "contact_email": "customer.acme@example.com",
                 "contact_phone": "+1 555-0199",
                 "billing_address_line1": "100 Enterprise Blvd, Suite 400",
                 "city": "San Francisco",
@@ -118,7 +118,7 @@ def seed():
             },
             {
                 "company_name": "Global Dynamics Corp",
-                "contact_email": "billing@globaldynamics.local",
+                "contact_email": "customer.global@example.com",
                 "contact_phone": "+1 555-0248",
                 "billing_address_line1": "500 Innovation Way",
                 "city": "Austin",
@@ -164,8 +164,8 @@ def seed():
                 logger.info(f"Customer already present: {c.company_name}")
             customer_map[c_def["contact_email"]] = c
 
-        customer_acme = customer_map["customer@acme.local"]
-        customer_global = customer_map["billing@globaldynamics.local"]
+        customer_acme = customer_map["customer.acme@example.com"]
+        customer_global = customer_map["customer.global@example.com"]
 
         # -------------------------------------------------------------
         # 4. Products & Subscription Plans

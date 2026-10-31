@@ -155,9 +155,9 @@ The login page (`/login`) includes quick-fill buttons for instant evaluation:
 
 | Role | Email Address | Password | Intended Capabilities |
 | :--- | :--- | :--- | :--- |
-| **Administrator** | `admin@brightloop.local` | `AdminPass123!` | Full control: catalog, plans, taxes, discounts, users, audit log, billing runs, voids. |
-| **Operations Staff** | `staff1@brightloop.local` | `StaffPass123!` | Operational workflows: quotations, subscriptions, invoices, payment recording. |
-| **Customer (Acme)** | `customer@acme.local` | `CustomerPass123!` | Self-service portal: subscription status, invoice PDF downloads, payment receipts. |
-| **Customer (Global Dynamics)** | `billing@globaldynamics.local` | `CustomerPass123!` | Self-service portal: overdue receivables, past-due invoices, settlement history. |
+| **Administrator** | `admin@example.com` | `AdminPass123!` | Full control: catalog, plans, taxes, discounts, users, audit log, billing runs, voids. |
+| **Operations Staff** | `staff1@example.com` | `StaffPass123!` | Operational workflows: quotations, subscriptions, invoices, payment recording. |
+| **Customer (Acme)** | `customer.acme@example.com` | `CustomerPass123!` | Self-service portal: subscription status, invoice PDF downloads, payment receipts. |
+| **Customer (Global Dynamics)** | `customer.global@example.com` | `CustomerPass123!` | Self-service portal: overdue receivables, past-due invoices, settlement history. |
 
 See [docs/demo-walkthrough.md](docs/demo-walkthrough.md) for the complete 16-step evaluation walkthrough.

@@ -12,7 +12,7 @@ import {
   Edit2,
   Trash2,
   X,
-  Calendar,
+  RefreshCw,
 } from "lucide-react";
 import {
   catalogApi,
@@ -199,29 +199,32 @@ export default function PlansPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="bg-white border-2 sm:border-3 border-nb-dark p-6 shadow-nb flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-indigo-600">
-            <Layers className="h-6 w-6" />
-            <h1 className="text-2xl font-bold text-slate-900">Subscription Plans</h1>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-nb-green border-2 border-nb-dark text-[10px] font-black uppercase tracking-wider shadow-nb-sm mb-2">
+            Pricing Engine
           </div>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight flex items-center gap-2.5 text-nb-dark">
+            <Layers className="h-7 w-7 stroke-[2.5]" />
+            Subscription Plans
+          </h1>
+          <p className="text-xs font-bold text-zinc-600 mt-1">
             Configure recurring billing plans, intervals, renewal rules, pause limits, and tax mappings.
           </p>
         </div>
         <button
           onClick={openCreateModal}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition"
+          className="nb-btn nb-btn-primary inline-flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 stroke-[2.5]" />
           New Plan
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row gap-3">
+      <div className="bg-white p-4 border-2 sm:border-3 border-nb-dark shadow-nb flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-nb-dark stroke-[2.5]" />
           <input
             type="text"
             placeholder="Search by plan name or description..."
@@ -230,7 +233,7 @@ export default function PlansPage() {
               setSearchTerm(e.target.value);
               setPage(1);
             }}
-            className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="nb-input w-full pl-9 pr-4 py-2 text-xs bg-white font-bold"
           />
         </div>
         <select
@@ -239,7 +242,7 @@ export default function PlansPage() {
             setIntervalFilter(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="nb-input px-3 py-2 text-xs bg-white font-bold"
         >
           <option value="">All Intervals</option>
           <option value="DAILY">Daily</option>
@@ -253,7 +256,7 @@ export default function PlansPage() {
             setStatusFilter(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="nb-input px-3 py-2 text-xs bg-white font-bold"
         >
           <option value="">All Statuses</option>
           <option value="true">Active Only</option>
@@ -262,99 +265,102 @@ export default function PlansPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700 text-sm">
-          <AlertCircle className="h-5 w-5 shrink-0" />
+        <div className="p-3.5 bg-nb-coral text-white border-2 border-nb-dark shadow-nb flex items-center gap-2.5 text-xs font-bold">
+          <AlertCircle className="h-5 w-5 stroke-[2.5] shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Plans Table */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+      <div className="bg-white border-2 sm:border-3 border-nb-dark shadow-nb overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">Loading subscription plans...</div>
+          <div className="py-20 text-center text-xs font-black uppercase tracking-wider text-nb-dark flex flex-col items-center gap-3">
+            <RefreshCw className="h-7 w-7 animate-spin stroke-[2.5] text-nb-dark" />
+            Loading subscription plans...
+          </div>
         ) : plans.length === 0 ? (
-          <div className="p-12 text-center">
-            <Layers className="h-10 w-10 text-slate-300 mx-auto mb-2" />
-            <h3 className="text-sm font-semibold text-slate-700">No plans found</h3>
-            <p className="text-xs text-slate-500 mt-1">Try adjusting your filters or create a new plan.</p>
+          <div className="py-20 text-center text-nb-dark flex flex-col items-center">
+            <Layers className="h-12 w-12 stroke-[2] mb-3 text-zinc-400" />
+            <h3 className="font-black uppercase tracking-wide text-base">No plans found</h3>
+            <p className="text-xs font-bold text-zinc-500 mt-1">Try adjusting your filters or create a new plan.</p>
           </div>
         ) : (
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
-            <thead className="bg-slate-50 text-slate-600 font-medium">
+          <table className="w-full text-left text-xs font-bold">
+            <thead className="bg-nb-dark text-white font-black uppercase tracking-wider border-b-2 border-nb-dark text-[11px]">
               <tr>
-                <th className="px-6 py-3 text-left">Plan Name</th>
-                <th className="px-6 py-3 text-left">Interval</th>
-                <th className="px-6 py-3 text-right">Base Price</th>
-                <th className="px-6 py-3 text-center">Renewal Policy</th>
-                <th className="px-6 py-3 text-center">Status</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th className="px-5 py-3 text-left">Plan Name</th>
+                <th className="px-5 py-3 text-left">Interval</th>
+                <th className="px-5 py-3 text-right">Base Price</th>
+                <th className="px-5 py-3 text-center">Renewal Policy</th>
+                <th className="px-5 py-3 text-center">Status</th>
+                <th className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y-2 divide-nb-dark text-nb-dark">
               {plans.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50/75 transition">
-                  <td className="px-6 py-4">
-                    <div className="font-semibold text-slate-900">{p.name}</div>
+                <tr key={p.id} className="hover:bg-cream transition-colors">
+                  <td className="px-5 py-4">
+                    <div className="font-black text-sm text-nb-dark">{p.name}</div>
                     {p.description && (
-                      <div className="text-xs text-slate-500 line-clamp-1">{p.description}</div>
+                      <div className="text-[11px] text-zinc-600 line-clamp-1 font-normal mt-0.5">{p.description}</div>
                     )}
                   </td>
-                  <td className="px-6 py-4 font-mono text-xs">
+                  <td className="px-5 py-4 font-mono font-bold text-zinc-700">
                     {p.interval_count > 1 ? `${p.interval_count} ` : ""}
                     {p.billing_interval}
                   </td>
-                  <td className="px-6 py-4 text-right font-mono font-medium text-slate-900">
+                  <td className="px-5 py-4 text-right font-mono font-black text-nb-dark">
                     ₹{Number(p.base_price).toFixed(2)}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-5 py-4 text-center">
                     {p.auto_renew ? (
-                      <span className="text-xs text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
+                      <span className="text-[10px] font-black uppercase bg-nb-yellow text-nb-dark px-2 py-0.5 border border-nb-dark shadow-nb-sm">
                         Auto-Renew
                       </span>
                     ) : p.auto_close_on_expiry ? (
-                      <span className="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                      <span className="text-[10px] font-black uppercase bg-cream text-nb-dark px-2 py-0.5 border border-nb-dark shadow-nb-sm">
                         Auto-Close
                       </span>
                     ) : (
-                      <span className="text-xs text-slate-500">Manual</span>
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase">Manual</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-5 py-4 text-center">
                     {p.is_active ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                        <CheckCircle className="h-3 w-3" /> Active
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-nb-green text-nb-dark px-2 py-0.5 border border-nb-dark shadow-nb-sm">
+                        <CheckCircle className="h-3 w-3 stroke-[2.5]" /> Active
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                        <XCircle className="h-3 w-3" /> Inactive
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-zinc-200 text-zinc-700 px-2 py-0.5 border border-nb-dark shadow-nb-sm">
+                        <XCircle className="h-3 w-3 stroke-[2.5]" /> Inactive
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-right space-x-2">
+                  <td className="px-5 py-4 text-right space-x-2">
                     <button
                       onClick={() => {
                         setSelectedPlanForTaxes(p);
                         loadTaxesForPlan(p.id);
                       }}
-                      className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition"
+                      className="nb-btn nb-btn-white inline-flex items-center gap-1 text-[11px] px-2.5 py-1 font-black uppercase"
                       title="Assign Tax Rules"
                     >
-                      <Receipt className="h-3.5 w-3.5 text-emerald-600" /> Taxes
+                      <Receipt className="h-3.5 w-3.5 stroke-[2.5]" /> Taxes
                     </button>
                     <button
                       onClick={() => openEditModal(p)}
-                      className="text-slate-400 hover:text-slate-700 p-1 transition"
+                      className="nb-btn nb-btn-white p-1.5"
                       title="Edit Plan"
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Edit2 className="h-3.5 w-3.5 stroke-[2.5]" />
                     </button>
                     {p.is_active && (
                       <button
                         onClick={() => handleDeactivatePlan(p)}
-                        className="text-red-400 hover:text-red-600 p-1 transition"
+                        className="nb-btn p-1.5 bg-nb-coral text-white"
                         title="Deactivate Plan"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5 stroke-[2.5]" />
                       </button>
                     )}
                   </td>
@@ -366,20 +372,20 @@ export default function PlansPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+          <div className="px-5 py-3 border-t-2 border-nb-dark bg-cream flex items-center justify-between text-xs font-black uppercase tracking-wider">
             <div>Page {page} of {totalPages}</div>
-            <div className="space-x-1">
+            <div className="flex gap-2">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="px-2.5 py-1 border border-slate-200 rounded disabled:opacity-40 hover:bg-slate-50"
+                className="nb-btn nb-btn-white px-3 py-1 text-xs disabled:opacity-40"
               >
                 Previous
               </button>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => p + 1)}
-                className="px-2.5 py-1 border border-slate-200 rounded disabled:opacity-40 hover:bg-slate-50"
+                className="nb-btn nb-btn-white px-3 py-1 text-xs disabled:opacity-40"
               >
                 Next
               </button>
@@ -390,26 +396,26 @@ export default function PlansPage() {
 
       {/* Plan Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h2 className="text-lg font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border-2 sm:border-3 border-nb-dark max-w-lg w-full p-6 shadow-nb-xl space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-nb-dark pb-3">
+              <h2 className="text-lg font-black uppercase tracking-tight text-nb-dark">
                 {editingPlan ? "Edit Plan" : "Create Subscription Plan"}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="h-5 w-5" />
+              <button onClick={() => setIsModalOpen(false)} className="nb-btn nb-btn-white p-1 text-nb-dark">
+                <X className="h-5 w-5 stroke-[2.5]" />
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
+              <div className="p-3 bg-nb-coral border-2 border-nb-dark text-white text-xs font-bold shadow-nb-sm">
                 {formError}
               </div>
             )}
 
             <form onSubmit={handleSavePlan} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-black uppercase tracking-wider mb-1">
                   Plan Name *
                 </label>
                 <input
@@ -418,31 +424,31 @@ export default function PlansPage() {
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="e.g. Enterprise Monthly"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                  className="nb-input w-full p-2.5 text-xs bg-white font-bold"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-black uppercase tracking-wider mb-1">
                   Description
                 </label>
                 <textarea
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                  className="nb-input w-full p-2.5 text-xs bg-white font-bold"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Billing Interval *
                   </label>
                   <select
                     value={formInterval}
                     onChange={(e) => setFormInterval(e.target.value as "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY")}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs bg-white font-bold"
                   >
                     <option value="DAILY">DAILY</option>
                     <option value="WEEKLY">WEEKLY</option>
@@ -451,7 +457,7 @@ export default function PlansPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Interval Count *
                   </label>
                   <input
@@ -460,14 +466,14 @@ export default function PlansPage() {
                     required
                     value={formIntervalCount}
                     onChange={(e) => setFormIntervalCount(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs bg-white font-bold"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Base Recurring Price (₹) *
                   </label>
                   <input
@@ -477,11 +483,11 @@ export default function PlansPage() {
                     required
                     value={formBasePrice}
                     onChange={(e) => setFormBasePrice(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs font-mono font-black bg-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Min Quantity *
                   </label>
                   <input
@@ -490,17 +496,17 @@ export default function PlansPage() {
                     required
                     value={formMinQty}
                     onChange={(e) => setFormMinQty(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs bg-white font-bold"
                   />
                 </div>
               </div>
 
               {/* Renewal Invariant Policy */}
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
-                <span className="text-xs font-semibold text-slate-700 block">
+              <div className="bg-cream p-3.5 border-2 border-nb-dark shadow-nb-sm space-y-2">
+                <span className="text-xs font-black uppercase tracking-wider text-nb-dark block">
                   Renewal Constraints (Mutually Exclusive)
                 </span>
-                <div className="flex items-center gap-6 text-xs">
+                <div className="flex items-center gap-6 text-xs font-black uppercase">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
@@ -510,9 +516,9 @@ export default function PlansPage() {
                         setFormAutoRenew(val);
                         if (val) setFormAutoClose(false);
                       }}
-                      className="rounded text-indigo-600 focus:ring-indigo-500"
+                      className="accent-nb-dark h-4 w-4 rounded-none border-2 border-nb-dark"
                     />
-                    <span className="text-slate-800">Auto-Renew</span>
+                    <span className="text-nb-dark">Auto-Renew</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -523,25 +529,25 @@ export default function PlansPage() {
                         setFormAutoClose(val);
                         if (val) setFormAutoRenew(false);
                       }}
-                      className="rounded text-indigo-600 focus:ring-indigo-500"
+                      className="accent-nb-dark h-4 w-4 rounded-none border-2 border-nb-dark"
                     />
-                    <span className="text-slate-800">Auto-Close on Expiry</span>
+                    <span className="text-nb-dark">Auto-Close on Expiry</span>
                   </label>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-2.5 pt-3 border-t-2 border-nb-dark">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50"
+                  className="nb-btn nb-btn-white px-3.5 py-2 text-xs font-black uppercase"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-xs disabled:opacity-50"
+                  className="nb-btn nb-btn-primary px-4 py-2 text-xs font-black uppercase disabled:opacity-50"
                 >
                   {formSubmitting ? "Saving..." : editingPlan ? "Update Plan" : "Create Plan"}
                 </button>
@@ -553,36 +559,36 @@ export default function PlansPage() {
 
       {/* Tax Assignment Modal */}
       {selectedPlanForTaxes && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border-2 sm:border-3 border-nb-dark max-w-md w-full p-6 shadow-nb-xl space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-nb-dark pb-3">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-lg font-black uppercase tracking-tight text-nb-dark">
                   Assign Plan Taxes
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs font-bold text-zinc-600">
                   Plan: {selectedPlanForTaxes.name}
                 </p>
               </div>
-              <button onClick={() => setSelectedPlanForTaxes(null)} className="text-slate-400 hover:text-slate-600">
-                <X className="h-5 w-5" />
+              <button onClick={() => setSelectedPlanForTaxes(null)} className="nb-btn nb-btn-white p-1 text-nb-dark">
+                <X className="h-5 w-5 stroke-[2.5]" />
               </button>
             </div>
 
             {taxesLoading ? (
-              <div className="p-6 text-center text-xs text-slate-400">Loading taxes...</div>
+              <div className="p-6 text-center text-xs font-black uppercase tracking-wider text-zinc-500">Loading taxes...</div>
             ) : allTaxRules.length === 0 ? (
-              <div className="p-4 text-center text-xs text-slate-500">
+              <div className="p-4 text-center text-xs font-bold text-zinc-500">
                 No active tax rules configured. Create tax rules in the Tax Rules menu first.
               </div>
             ) : (
-              <div className="space-y-2 max-h-60 overflow-y-auto border border-slate-200 rounded-lg p-3">
+              <div className="space-y-2 max-h-60 overflow-y-auto border-2 border-nb-dark p-3 shadow-nb-sm">
                 {allTaxRules.map((tr) => {
                   const isChecked = assignedTaxIds.includes(tr.id);
                   return (
                     <label
                       key={tr.id}
-                      className="flex items-center justify-between p-2 rounded hover:bg-slate-50 text-xs cursor-pointer border border-transparent hover:border-slate-200"
+                      className="flex items-center justify-between p-2.5 hover:bg-cream text-xs font-bold cursor-pointer border border-nb-dark bg-white transition-colors"
                     >
                       <div className="flex items-center gap-2">
                         <input
@@ -595,15 +601,15 @@ export default function PlansPage() {
                               setAssignedTaxIds(assignedTaxIds.filter((id) => id !== tr.id));
                             }
                           }}
-                          className="rounded text-indigo-600 focus:ring-indigo-500"
+                          className="accent-nb-dark h-4 w-4 rounded-none border-2 border-nb-dark"
                         />
-                        <span className="font-medium text-slate-800">{tr.name}</span>
+                        <span className="font-black text-nb-dark">{tr.name}</span>
                       </div>
                       <div className="text-right">
-                        <span className="font-mono text-indigo-600 font-semibold">
+                        <span className="font-mono font-black text-nb-blue">
                           {Number(tr.rate).toFixed(2)}%
                         </span>
-                        <span className="text-[10px] text-slate-400 block uppercase">
+                        <span className="text-[10px] text-zinc-500 block uppercase font-bold">
                           {tr.tax_scope}
                         </span>
                       </div>
@@ -613,11 +619,11 @@ export default function PlansPage() {
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex justify-end gap-2.5 pt-3 border-t-2 border-nb-dark">
               <button
                 type="button"
                 onClick={() => setSelectedPlanForTaxes(null)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50"
+                className="nb-btn nb-btn-white px-3.5 py-2 text-xs font-black uppercase"
               >
                 Cancel
               </button>
@@ -625,7 +631,7 @@ export default function PlansPage() {
                 type="button"
                 disabled={taxesSaving}
                 onClick={handleSaveTaxes}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                className="nb-btn nb-btn-primary px-4 py-2 text-xs font-black uppercase disabled:opacity-50"
               >
                 {taxesSaving ? "Saving..." : "Save Taxes"}
               </button>

@@ -105,7 +105,7 @@ def test_complete_platform_e2e_journey(client: TestClient, db_session: Session):
     # 1. Create Customer
     customer = Customer(
         company_name=f"Acme Corp E2E {suffix}",
-        contact_email=f"billing_{suffix}@acme.local",
+        contact_email=f"billing_{suffix}@example.com",
         contact_phone="9988776655",
         billing_address_line1="123 Industrial Way",
         city="Bengaluru",
