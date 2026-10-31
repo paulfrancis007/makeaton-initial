@@ -1,0 +1,33 @@
+# Local credentials and environment files
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+
+# Frontend dependencies/builds
+**/node_modules/
+**/.next/
+**/out/
+**/dist/
+
+# Python environments and caches
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+
+# Test/build output and local logs
+**/coverage/
+**/htmlcov/
+**/.coverage
+**/playwright-report/
+**/test-results/
+**/*.log
+tmp/
+
+# Local database backups
+**/*.dump
+**/*.backup
