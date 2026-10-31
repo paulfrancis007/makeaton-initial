@@ -10,6 +10,23 @@ export interface PaginatedResult<T> {
   pages: number;
 }
 
+export interface Customer {
+  id: string;
+  company_name: string;
+  contact_email: string;
+  contact_phone: string | null;
+  tax_number: string | null;
+  billing_address_line1: string;
+  billing_address_line2: string | null;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  currency: string;
+  is_active: boolean;
+  created_at: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -108,6 +125,157 @@ export interface DiscountEvaluationResponse {
   rule_id: string | null;
 }
 
+// -------------------------------------------------------------
+// Quotation Interfaces
+// -------------------------------------------------------------
+export interface QuotationLineTax {
+  id: string;
+  quotation_line_id: string;
+  tax_rule_id: string | null;
+  tax_name_snapshot: string;
+  tax_rate_snapshot: string;
+  tax_amount: string;
+}
+
+export interface QuotationLine {
+  id: string;
+  quotation_id: string;
+  line_type: "PLAN_FEE" | "PRODUCT";
+  product_id: string | null;
+  variant_id: string | null;
+  description_snapshot: string;
+  unit_price: string;
+  quantity: number;
+  tax_rate_snapshot: string;
+  tax_amount: string;
+  discount_amount: string;
+  line_total: string;
+  taxes: QuotationLineTax[];
+}
+
+export interface Quotation {
+  id: string;
+  quotation_number: string;
+  customer_id: string;
+  template_id: string | null;
+  plan_id: string;
+  status: "DRAFT" | "SENT" | "CONFIRMED" | "EXPIRED" | "REJECTED";
+  issue_date: string;
+  expiry_date: string;
+  plan_price_snapshot: string;
+  subtotal_amount: string;
+  discount_amount: string;
+  tax_amount: string;
+  rounding_adjustment: string;
+  total_amount: string;
+  currency: string;
+  notes: string | null;
+  created_by_user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuotationDetail extends Quotation {
+  lines: QuotationLine[];
+  plan_name?: string | null;
+  customer_company_name?: string | null;
+}
+
+export interface QuotationTemplateLine {
+  id: string;
+  template_id: string;
+  product_id: string;
+  variant_id: string | null;
+  quantity: number;
+  unit_price_override: string | null;
+}
+
+export interface QuotationTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  plan_id: string;
+  validity_duration_days: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  lines: QuotationTemplateLine[];
+}
+
+// -------------------------------------------------------------
+// Subscription Interfaces
+// -------------------------------------------------------------
+export interface SubscriptionLineTax {
+  id: string;
+  subscription_line_id: string;
+  tax_rule_id: string | null;
+  tax_name_snapshot: string;
+  tax_rate_snapshot: string;
+  tax_amount: string;
+}
+
+export interface SubscriptionLine {
+  id: string;
+  subscription_id: string;
+  line_type: "PLAN_FEE" | "PRODUCT";
+  product_id: string | null;
+  variant_id: string | null;
+  description_snapshot: string;
+  unit_price_snapshot: string;
+  quantity: number;
+  tax_rate_snapshot: string;
+  line_total: string;
+  taxes: SubscriptionLineTax[];
+}
+
+export interface SubscriptionPauseHistory {
+  id: string;
+  subscription_id: string;
+  paused_at: string;
+  resumed_at: string | null;
+  pause_reason: string | null;
+  days_extended: number;
+  initiated_by_user_id: string;
+}
+
+export interface Subscription {
+  id: string;
+  subscription_number: string;
+  customer_id: string;
+  quotation_id: string | null;
+  plan_id: string;
+  status: "DRAFT" | "QUOTATION" | "CONFIRMED" | "ACTIVE" | "PAUSED" | "EXPIRED" | "CLOSED";
+  start_date: string;
+  expiry_date: string | null;
+  current_period_start: string;
+  current_period_end: string;
+  next_billing_date: string;
+  billing_anchor_day: number;
+  billing_interval_snapshot: string;
+  interval_count_snapshot: number;
+  allow_pause_snapshot: boolean;
+  allow_early_closure_snapshot: boolean;
+  auto_renew_snapshot: boolean;
+  auto_close_snapshot: boolean;
+  plan_name_snapshot: string;
+  plan_price_snapshot: string;
+  recurring_subtotal: string;
+  recurring_discount: string;
+  recurring_tax: string;
+  recurring_total_amount: string;
+  currency: string;
+  payment_terms_days: number;
+  created_by_user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubscriptionDetail extends Subscription {
+  lines: SubscriptionLine[];
+  pause_history: SubscriptionPauseHistory[];
+  customer_company_name?: string | null;
+}
+
 export function getStoredToken(): string {
   if (typeof window === "undefined") return "";
   return localStorage.getItem("brightloop_token") || "";
@@ -145,6 +313,21 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   return response.json();
 }
+
+// -------------------------------------------------------------
+// Customer API
+// -------------------------------------------------------------
+export const customerApi = {
+  listCustomers: (params?: { search?: string; is_active?: boolean; page?: number; page_size?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.search) query.append("search", params.search);
+    if (params?.is_active !== undefined) query.append("is_active", String(params.is_active));
+    if (params?.page) query.append("page", String(params.page));
+    if (params?.page_size) query.append("page_size", String(params.page_size));
+    return request<PaginatedResult<Customer>>(`/customers/?${query.toString()}`);
+  },
+  getCustomer: (id: string) => request<Customer>(`/customers/${id}`),
+};
 
 // -------------------------------------------------------------
 // Catalog API
@@ -244,4 +427,64 @@ export const catalogApi = {
     request<DiscountRule>(`/discounts/${id}`, { method: "DELETE" }),
   evaluateDiscount: (data: DiscountEvaluationRequest) =>
     request<DiscountEvaluationResponse>("/discounts/evaluate", { method: "POST", body: JSON.stringify(data) }),
+};
+
+// -------------------------------------------------------------
+// Quotation API
+// -------------------------------------------------------------
+export const quotationApi = {
+  listTemplates: (params?: { search?: string; is_active?: boolean; page?: number; page_size?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.search) query.append("search", params.search);
+    if (params?.is_active !== undefined) query.append("is_active", String(params.is_active));
+    if (params?.page) query.append("page", String(params.page));
+    if (params?.page_size) query.append("page_size", String(params.page_size));
+    return request<PaginatedResult<QuotationTemplate>>(`/quotations/templates?${query.toString()}`);
+  },
+  getTemplate: (id: string) => request<QuotationTemplate>(`/quotations/templates/${id}`),
+  createTemplate: (data: any) =>
+    request<QuotationTemplate>("/quotations/templates", { method: "POST", body: JSON.stringify(data) }),
+
+  listQuotations: (params?: { customer_id?: string; status?: string; search?: string; page?: number; page_size?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.customer_id) query.append("customer_id", params.customer_id);
+    if (params?.status) query.append("status", params.status);
+    if (params?.search) query.append("search", params.search);
+    if (params?.page) query.append("page", String(params.page));
+    if (params?.page_size) query.append("page_size", String(params.page_size));
+    return request<PaginatedResult<Quotation>>(`/quotations/?${query.toString()}`);
+  },
+  getQuotation: (id: string) => request<QuotationDetail>(`/quotations/${id}`),
+  createQuotation: (data: any) =>
+    request<Quotation>("/quotations/", { method: "POST", body: JSON.stringify(data) }),
+  updateQuotation: (id: string, data: any) =>
+    request<QuotationDetail>(`/quotations/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  updateStatus: (id: string, status: string, rejection_reason?: string) =>
+    request<Quotation>(`/quotations/${id}/status`, { method: "POST", body: JSON.stringify({ status, rejection_reason }) }),
+};
+
+// -------------------------------------------------------------
+// Subscription API
+// -------------------------------------------------------------
+export const subscriptionApi = {
+  convertFromQuotation: (quotationId: string, data?: { start_date?: string; payment_terms_days?: number }) =>
+    request<Subscription>(`/subscriptions/from-quotation/${quotationId}`, { method: "POST", body: JSON.stringify(data || {}) }),
+  listSubscriptions: (params?: { customer_id?: string; status?: string; search?: string; page?: number; page_size?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.customer_id) query.append("customer_id", params.customer_id);
+    if (params?.status) query.append("status", params.status);
+    if (params?.search) query.append("search", params.search);
+    if (params?.page) query.append("page", String(params.page));
+    if (params?.page_size) query.append("page_size", String(params.page_size));
+    return request<PaginatedResult<Subscription>>(`/subscriptions/?${query.toString()}`);
+  },
+  getSubscription: (id: string) => request<SubscriptionDetail>(`/subscriptions/${id}`),
+  activate: (id: string) =>
+    request<Subscription>(`/subscriptions/${id}/activate`, { method: "POST" }),
+  pause: (id: string, reason?: string) =>
+    request<Subscription>(`/subscriptions/${id}/pause`, { method: "POST", body: JSON.stringify({ reason }) }),
+  resume: (id: string) =>
+    request<Subscription>(`/subscriptions/${id}/resume`, { method: "POST" }),
+  close: (id: string, reason?: string) =>
+    request<Subscription>(`/subscriptions/${id}/close`, { method: "POST", body: JSON.stringify({ reason }) }),
 };

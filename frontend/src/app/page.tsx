@@ -1,11 +1,12 @@
 import React from "react";
 import Link from "next/link";
 import {
-  CheckCircle2,
   Package,
   Layers,
   Receipt,
   Percent,
+  FileText,
+  Repeat,
   ArrowRight,
   Shield,
   Building2,
@@ -13,6 +14,22 @@ import {
 
 export default function HomePage() {
   const adminModules = [
+    {
+      title: "Quotation Management",
+      description: "Prepare quotations, apply frozen pricing, calculate rounding adjustments, and manage approval workflows.",
+      href: "/admin/quotations",
+      icon: FileText,
+      badge: "Stage 9",
+      color: "from-amber-500 to-orange-600",
+    },
+    {
+      title: "Subscription Lifecycle",
+      description: "Convert confirmed quotations into active contracts, manage pause/resume history, and handle terminations.",
+      href: "/admin/subscriptions",
+      icon: Repeat,
+      badge: "Stage 10",
+      color: "from-teal-600 to-emerald-600",
+    },
     {
       title: "Product Catalogue",
       description: "Manage billable goods, services, add-ons, pricing models, and SKU variants.",
@@ -55,7 +72,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <span className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-semibold tracking-wider uppercase text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-              Stages 7 & 8 Active • Catalogue, Plans, Taxes & Discounts
+              Stages 9 & 10 Active • Quotations & Subscription Lifecycle
             </span>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mt-2 flex items-center gap-3">
@@ -77,15 +94,15 @@ export default function HomePage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-slate-900">
-              Administrative Console & Product Configuration
+              Operational Management & Lifecycle Consoles
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Role-authorized administrative consoles for catalog maintenance and financial discount rules.
+              Role-authorized administrative consoles for catalog maintenance, quotations, and subscription lifecycle.
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {adminModules.map((mod) => {
             const Icon = mod.icon;
             return (
@@ -135,7 +152,7 @@ export default function HomePage() {
               ADMIN ROLE
             </span>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Full authority: create, update, deactivate catalog items, configure tax rates, define discount coupons, assign staff, and trigger billing runs.
+              Full authority: configure catalog, tax rates, discount rules, manage staff, manage quotation templates, review customer subscriptions, and trigger billing runs.
             </p>
           </div>
           <div className="border border-slate-200 rounded-lg p-5 bg-slate-50/50">
@@ -143,7 +160,7 @@ export default function HomePage() {
               STAFF ROLE
             </span>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Operational read authority: view catalog, search products, inspect plans and evaluate discount coupons for quotations. Cannot alter administrative configuration.
+              Operational authority: prepare and issue quotations, confirm quotations, convert confirmed quotations to subscriptions, pause/resume subscriptions. Cannot alter administrative configuration.
             </p>
           </div>
           <div className="border border-slate-200 rounded-lg p-5 bg-slate-50/50">
@@ -151,7 +168,7 @@ export default function HomePage() {
               CUSTOMER ROLE
             </span>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Strict multi-tenant customer isolation: forbidden from administrative configuration endpoints; restricted to their own organization profile and invoices.
+              Strict multi-tenant customer isolation: forbidden from administrative configuration endpoints; restricted to reviewing their own organization's quotations and active subscriptions.
             </p>
           </div>
         </div>
@@ -159,7 +176,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 pt-6 text-center text-xs text-slate-400">
-        Brightloop Subscription Management System • Completed Combined Stage 7 + Stage 8
+        Brightloop Subscription Management System • Completed Combined Stage 9 + Stage 10
       </footer>
     </main>
   );
