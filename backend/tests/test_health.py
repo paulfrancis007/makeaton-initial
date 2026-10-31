@@ -47,5 +47,8 @@ def test_404_error_structure(client: TestClient):
     response = client.get("/api/v1/nonexistent-route-for-testing")
     assert response.status_code == 404
     data = response.json()
-    # FastAPI default 404 or structured
-    assert "detail" in data or "error" in data
+    assert "error" in data
+    assert data["error"]["code"] == "NOT_FOUND"
+    assert data["error"]["message"] == "Not Found"
+    assert "request_id" in data["error"]
+    assert data["error"]["request_id"] is not None

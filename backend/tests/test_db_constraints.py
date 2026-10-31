@@ -14,6 +14,8 @@ from app.models import (
     SubscriptionTerm,
     AgreementVersion,
     AgreementLine,
+    SubscriptionEvent,
+    SubscriptionPause,
     Invoice,
     Payment,
     TaxRule,
@@ -389,3 +391,146 @@ def test_financial_deletion_safety_restrict(db: Session):
     with pytest.raises(IntegrityError):
         db.commit()
     db.rollback()
+
+
+def test_partial_unique_index_one_draft_version(db: Session):
+    c = Customer(email_normalized="draft-test@example.com", name="Draft Tester")
+    p = Plan(name="Draft Plan", base_fee=Decimal("100.00"), minimum_seats=1, extra_seat_unit_price=Decimal("0"), interval="MONTHLY")
+    db.add_all([c, p])
+    db.commit()
+
+    sub = Subscription(number="SUB-DRAFT-01", customer_id=c.id, plan_id=p.id, state="DRAFT", seat_quantity=1)
+    db.add(sub)
+    db.commit()
+
+    v1 = AgreementVersion(subscription_id=sub.id, sequence=1, state="DRAFT", seat_quantity=1)
+    db.add(v1)
+    db.commit()
+
+    # Second DRAFT version for the same subscription must fail partial unique index
+    v2_draft = AgreementVersion(subscription_id=sub.id, sequence=2, state="DRAFT", seat_quantity=1)
+    db.add(v2_draft)
+    with pytest.raises(IntegrityError):
+        db.commit()
+    db.rollback()
+
+    # But an ISSUED version for the same subscription succeeds
+    v2_issued = AgreementVersion(subscription_id=sub.id, sequence=2, state="ISSUED", seat_quantity=1)
+    db.add(v2_issued)
+    db.commit()
+
+
+def test_partial_unique_index_accepted_version_effective_dates(db: Session):
+    c = Customer(email_normalized="accepted-test@example.com", name="Accepted Tester")
+    p = Plan(name="Accepted Plan", base_fee=Decimal("100.00"), minimum_seats=1, extra_seat_unit_price=Decimal("0"), interval="MONTHLY")
+    db.add_all([c, p])
+    db.commit()
+
+    sub = Subscription(number="SUB-ACCEPT-01", customer_id=c.id, plan_id=p.id, state="ACTIVE", seat_quantity=1)
+    db.add(sub)
+    db.commit()
+
+    effective_dt = date(2027, 1, 1)
+    v1 = AgreementVersion(subscription_id=sub.id, sequence=1, state="ACCEPTED", effective_from=effective_dt, seat_quantity=1)
+    db.add(v1)
+    db.commit()
+
+    # Second ACCEPTED version with same effective date for same subscription must fail
+    v2 = AgreementVersion(subscription_id=sub.id, sequence=2, state="ACCEPTED", effective_from=effective_dt, seat_quantity=1)
+    db.add(v2)
+    with pytest.raises(IntegrityError):
+        db.commit()
+    db.rollback()
+
+    # Second ACCEPTED version with different effective date succeeds
+    v3 = AgreementVersion(subscription_id=sub.id, sequence=2, state="ACCEPTED", effective_from=date(2027, 7, 1), seat_quantity=1)
+    db.add(v3)
+    db.commit()
+
+
+def test_partial_unique_index_one_open_pause_per_term(db: Session):
+    c = Customer(email_normalized="pause-test@example.com", name="Pause Tester")
+    p = Plan(name="Pause Plan", base_fee=Decimal("100.00"), minimum_seats=1, extra_seat_unit_price=Decimal("0"), interval="MONTHLY")
+    db.add_all([c, p])
+    db.commit()
+
+    sub = Subscription(number="SUB-PAUSE-01", customer_id=c.id, plan_id=p.id, state="ACTIVE", seat_quantity=1)
+    db.add(sub)
+    db.commit()
+
+    term = SubscriptionTerm(subscription_id=sub.id, sequence=1, start_date=date(2027, 1, 1), expiry_date=date(2028, 1, 1), original_anchor_date=date(2027, 1, 1), interval="MONTHLY")
+    db.add(term)
+    db.commit()
+
+    ev1 = SubscriptionEvent(subscription_id=sub.id, action="PAUSE", effective_date=date(2027, 2, 1))
+    ev2 = SubscriptionEvent(subscription_id=sub.id, action="PAUSE", effective_date=date(2027, 3, 1))
+    db.add_all([ev1, ev2])
+    db.commit()
+
+    pause1 = SubscriptionPause(
+        term_id=term.id,
+        start_date=date(2027, 2, 1),
+        resumed_date=None,  # Open pause
+        original_expiry_date=date(2028, 1, 1),
+        pause_event_id=ev1.id,
+    )
+    db.add(pause1)
+    db.commit()
+
+    # Second open pause for the same term must fail partial unique index
+    pause2 = SubscriptionPause(
+        term_id=term.id,
+        start_date=date(2027, 3, 1),
+        resumed_date=None,  # Open pause
+        original_expiry_date=date(2028, 1, 1),
+        pause_event_id=ev2.id,
+    )
+    db.add(pause2)
+    with pytest.raises(IntegrityError):
+        db.commit()
+    db.rollback()
+
+
+def test_term_source_version_cross_subscription_foreign_key_prevention(db: Session):
+    c = Customer(email_normalized="cross-sub@example.com", name="Cross Sub Tester")
+    p = Plan(name="Cross Plan", base_fee=Decimal("100.00"), minimum_seats=1, extra_seat_unit_price=Decimal("0"), interval="MONTHLY")
+    db.add_all([c, p])
+    db.commit()
+
+    sub_a = Subscription(number="SUB-CROSS-A", customer_id=c.id, plan_id=p.id, state="ACTIVE", seat_quantity=1)
+    sub_b = Subscription(number="SUB-CROSS-B", customer_id=c.id, plan_id=p.id, state="ACTIVE", seat_quantity=1)
+    db.add_all([sub_a, sub_b])
+    db.commit()
+
+    # Agreement belongs to sub_a
+    agr_a = AgreementVersion(subscription_id=sub_a.id, sequence=1, state="ACCEPTED", seat_quantity=1)
+    db.add(agr_a)
+    db.commit()
+
+    # Term belongs to sub_b, but attempts to reference agr_a belonging to sub_a
+    term_bad = SubscriptionTerm(
+        subscription_id=sub_b.id,
+        sequence=1,
+        start_date=date(2027, 1, 1),
+        expiry_date=date(2028, 1, 1),
+        original_anchor_date=date(2027, 1, 1),
+        interval="MONTHLY",
+        source_version_id=agr_a.id,  # Illegal cross-subscription reference!
+    )
+    db.add(term_bad)
+    with pytest.raises(IntegrityError):
+        db.commit()
+    db.rollback()
+
+    # Term belongs to sub_a and references agr_a belonging to sub_a -> succeeds!
+    term_good = SubscriptionTerm(
+        subscription_id=sub_a.id,
+        sequence=1,
+        start_date=date(2027, 1, 1),
+        expiry_date=date(2028, 1, 1),
+        original_anchor_date=date(2027, 1, 1),
+        interval="MONTHLY",
+        source_version_id=agr_a.id,
+    )
+    db.add(term_good)
+    db.commit()

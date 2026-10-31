@@ -19,7 +19,7 @@ The plan follows the supplied Subscription Management System PDF and the evaluat
 
 ## Current status
 
-Phase 0 design accepted; Phase 1 (foundation, database models, migrations, and layout) implemented and verified. Both development (`brightloop_dev`) and disposable test (`brightloop_test`) databases are migrated to head with the full 36-entity schema. Native PostgreSQL 18 and Docker Mailpit are operational. All 13 backend unit and database constraint tests pass. Frontend App Router builds cleanly and connects to backend diagnostics.
+Phase 0 design accepted; Phase 1 (foundation, database models, migrations, and layout) implemented, corrected, and verified. Both development (`brightloop_dev`) and disposable test (`brightloop_test`) databases are migrated to head with the full 36-entity schema, partial unique indexes, and foreign keys. Native PostgreSQL 18 and Docker Mailpit are operational. All 17 backend unit and database constraint tests pass. Frontend App Router builds cleanly with working navigation and connects to backend diagnostics.
 
 Page inventory: **4 public + 10 shared admin/staff + 11 admin-only + 7 customer = 32 templates**. Dialogs, tabs, redirects, error states and document downloads are included in their parent workflows rather than counted as extra pages.
 
@@ -109,7 +109,7 @@ cd ..
 $env:PYTHONPATH='backend'
 backend\.venv\Scripts\python.exe -m pytest backend/tests -v
 ```
-All 13 tests execute against the isolated `brightloop_test` database, exercising check constraints, composite unique/foreign keys, total identity, payment validation, and financial deletion safety.
+All 17 tests execute against the isolated `brightloop_test` database, exercising check constraints, composite unique/foreign keys, partial unique indexes, total identity, payment validation, and financial deletion safety.
 
 4. Start FastAPI backend server:
 ```powershell

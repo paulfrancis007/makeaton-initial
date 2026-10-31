@@ -55,7 +55,7 @@ Implement one accepted phase at a time. A gate requires only capabilities introd
 
 **Pages:** app/auth/portal layout foundations only; temporary development health page is removed before final acceptance and is not in the 32-page product inventory.
 
-**Gate: PASS.** Frontend and backend start; readiness checks live PostgreSQL; Alembic migration created and applied to dev and test databases; all 36 relational entities defined; composite foreign keys and constraints exercised via Pytest (13 tests passing, including user email uniqueness, role check, product price non-negative, plan interval, invoice total identity, payment constraints, and financial deletion safety RESTRICT). Setup and reproduction commands documented in README.
+**Gate: PASS.** Frontend and backend start; readiness checks live PostgreSQL; schema verified from empty base through Alembic migrations (without create_all fallback); all 36 relational entities defined; composite foreign keys, partial unique indexes, and constraints exercised via Pytest (17 tests passing, including user email uniqueness, role check, product price non-negative, plan interval, invoice total identity, payment constraints, partial unique draft version, partial unique open pause, partial unique accepted effective date, cross-subscription term source FK, and financial deletion safety RESTRICT). Navigation hides undelivered routes; setup and reproduction commands documented in README.
 
 ### Phase 2 - Identity, staff and customer records
 

@@ -10,6 +10,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     ForeignKeyConstraint,
+    Index,
     Integer,
     Numeric,
     String,
@@ -17,6 +18,7 @@ from sqlalchemy import (
     UniqueConstraint,
     Uuid,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -104,9 +106,16 @@ class SubscriptionTerm(Base):
         UniqueConstraint("id", "subscription_id", name="uq_subscription_terms_id_sub"),
         CheckConstraint("expiry_date > start_date", name="ck_sub_terms_expiry_gt_start"),
         CheckConstraint("interval IN ('DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY')", name="ck_sub_terms_interval"),
+        ForeignKeyConstraint(
+            ["source_version_id", "subscription_id"],
+            ["agreement_versions.id", "agreement_versions.subscription_id"],
+            ondelete="RESTRICT",
+            name="fk_subscription_terms_source_version_sub",
+        ),
     )
 
     subscription = relationship("Subscription", back_populates="terms", foreign_keys=[subscription_id])
+    source_version = relationship("AgreementVersion", foreign_keys=[source_version_id], post_update=True)
     pauses = relationship("SubscriptionPause", back_populates="term", cascade="all, delete-orphan", foreign_keys="[SubscriptionPause.term_id]")
 
 
@@ -153,9 +162,23 @@ class AgreementVersion(Base, TimestampMixin):
         CheckConstraint("state IN ('DRAFT', 'ISSUED', 'ACCEPTED', 'SUPERSEDED')", name="ck_agreement_versions_state"),
         CheckConstraint("seat_quantity > 0", name="ck_agreement_versions_seat_qty_pos"),
         CheckConstraint("payment_term_days >= 0", name="ck_agreement_versions_payment_terms_nonneg"),
+        Index(
+            "uq_agreement_versions_one_draft",
+            "subscription_id",
+            unique=True,
+            postgresql_where=text("state = 'DRAFT'"),
+        ),
+        Index(
+            "uq_agreement_versions_accepted_effective",
+            "subscription_id",
+            "effective_from",
+            unique=True,
+            postgresql_where=text("state = 'ACCEPTED'"),
+        ),
     )
 
     subscription = relationship("Subscription", back_populates="agreement_versions", foreign_keys=[subscription_id])
+    term = relationship("SubscriptionTerm", foreign_keys=[term_id], post_update=True)
     lines = relationship("AgreementLine", back_populates="version", cascade="all, delete-orphan")
     discounts = relationship("AgreementDiscount", back_populates="version", cascade="all, delete-orphan")
 
@@ -389,6 +412,12 @@ class SubscriptionPause(Base):
 
     __table_args__ = (
         CheckConstraint("resumed_date IS NULL OR resumed_date > start_date", name="ck_sub_pauses_resumed_gt_start"),
+        Index(
+            "uq_subscription_pauses_one_open",
+            "term_id",
+            unique=True,
+            postgresql_where=text("resumed_date IS NULL"),
+        ),
     )
 
     term = relationship("SubscriptionTerm", back_populates="pauses", foreign_keys=[term_id])

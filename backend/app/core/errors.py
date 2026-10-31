@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
 class ErrorField(BaseModel):
@@ -76,6 +77,27 @@ def register_error_handlers(app: FastAPI) -> None:
                 "code": exc.code,
                 "message": exc.message,
                 "fields": [f.model_dump() for f in exc.fields] if exc.fields else None,
+                "request_id": request_id,
+            }
+        }
+        return JSONResponse(status_code=exc.status_code, content=content)
+
+    @app.exception_handler(StarletteHTTPException)
+    async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+        request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
+        code_map = {
+            404: "NOT_FOUND",
+            401: "UNAUTHORIZED",
+            403: "FORBIDDEN",
+            405: "METHOD_NOT_ALLOWED",
+        }
+        code = code_map.get(exc.status_code, "HTTP_ERROR")
+        message = exc.detail if isinstance(exc.detail, str) else "An error occurred"
+        content = {
+            "error": {
+                "code": code,
+                "message": message,
+                "fields": None,
                 "request_id": request_id,
             }
         }
