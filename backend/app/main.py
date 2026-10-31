@@ -1,8 +1,11 @@
-from fastapi import FastAPI
+from typing import Any
+from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from app.core.config import settings
+from app.db.session import check_db_health
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -29,10 +32,16 @@ class HealthResponse(BaseModel):
     environment: str
 
 
+class DatabaseHealthResponse(BaseModel):
+    status: str
+    database: str
+
+
 class RootResponse(BaseModel):
     message: str
     docs_url: str
     health_url: str
+    db_health_url: str
 
 
 @app.get("/", response_model=RootResponse, tags=["General"])
@@ -41,6 +50,7 @@ def root() -> RootResponse:
         message="Brightloop Subscription Management System API",
         docs_url=f"{settings.API_V1_PREFIX}/docs",
         health_url=f"{settings.API_V1_PREFIX}/health",
+        db_health_url=f"{settings.API_V1_PREFIX}/health/db",
     )
 
 
@@ -51,4 +61,24 @@ def health_check() -> HealthResponse:
         service=settings.PROJECT_NAME,
         version=settings.VERSION,
         environment=settings.ENVIRONMENT,
+    )
+
+
+@app.get(
+    f"{settings.API_V1_PREFIX}/health/db",
+    response_model=DatabaseHealthResponse,
+    responses={
+        503: {
+            "model": DatabaseHealthResponse,
+            "description": "Database service unavailable",
+        }
+    },
+    tags=["Health"],
+)
+def database_health_check() -> Any:
+    if check_db_health():
+        return DatabaseHealthResponse(status="ok", database="connected")
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={"status": "unavailable", "database": "disconnected"},
     )

@@ -8,6 +8,7 @@ def test_app_configuration():
     routes = [route.path for route in app.routes]
     assert "/" in routes
     assert "/api/v1/health" in routes
+    assert "/api/v1/health/db" in routes
     assert "/api/v1/docs" in routes
     assert "/api/v1/openapi.json" in routes
 
@@ -18,6 +19,7 @@ def test_root_endpoint_logic():
     assert response.message == "Brightloop Subscription Management System API"
     assert response.docs_url == f"{settings.API_V1_PREFIX}/docs"
     assert response.health_url == f"{settings.API_V1_PREFIX}/health"
+    assert response.db_health_url == f"{settings.API_V1_PREFIX}/health/db"
 
 
 def test_health_check_endpoint_logic():
