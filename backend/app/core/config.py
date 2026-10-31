@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -26,6 +26,15 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "brightloop_dev"
     DATABASE_URL: str = ""
+
+    # SMTP & Email Delivery Configuration (e.g. Brevo)
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    SMTP_TLS: bool = True
+    EMAILS_FROM_NAME: str = "Brightloop Billing"
+    EMAILS_FROM_EMAIL: str = "billing@brightloop.local"
 
     @model_validator(mode="after")
     def assemble_database_url(self) -> "Settings":

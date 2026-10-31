@@ -53,10 +53,10 @@ The login page (`/login`) includes one-click quick-fill buttons for each role:
 
 | Role | Email Address | Password | Intended Capabilities |
 | :--- | :--- | :--- | :--- |
-| **Administrator** | `admin@brightloop.local` | `AdminPass123!` | Full control: catalog, plans, taxes, discounts, users, audit log, billing runs, voids. |
-| **Operations Staff** | `staff1@brightloop.local` | `StaffPass123!` | Day-to-day operations: customer management, quotations, subscriptions, invoices, payments. |
-| **Customer 1** | `customer@acme.local` | `CustomerPass123!` | Acme Enterprises Ltd: self-service dashboard, subscriptions, invoice downloads. |
-| **Customer 2** | `billing@globaldynamics.local` | `CustomerPass123!` | Global Dynamics Corp: view account subscriptions, past-due invoices, receipts. |
+| **Administrator** | `admin@example.com` | `AdminPass123!` | Full control: catalog, plans, taxes, discounts, users, audit log, billing runs, voids. |
+| **Operations Staff** | `staff1@example.com` | `StaffPass123!` | Day-to-day operations: customer management, quotations, subscriptions, invoices, payments. |
+| **Customer 1** | `customer.acme@example.com` | `CustomerPass123!` | Acme Enterprises Ltd: self-service dashboard, subscriptions, invoice downloads. |
+| **Customer 2** | `customer.global@example.com` | `CustomerPass123!` | Global Dynamics Corp: view account subscriptions, past-due invoices, receipts. |
 
 ---
 
@@ -64,7 +64,7 @@ The login page (`/login`) includes one-click quick-fill buttons for each role:
 
 ### Step 1: Sign In as Administrator
 1. Open `http://localhost:3000/login`.
-2. Click the quick button **"Fill Admin Credentials"** (`admin@brightloop.local` / `AdminPass123!`).
+2. Click the quick button **"Fill Admin Credentials"** (`admin@example.com` / `AdminPass123!`).
 3. Click **"Sign In to Console"**.
 4. You are redirected to `/admin/dashboard`. Notice the top navbar displays the purple **ADMIN** role badge.
 
@@ -165,7 +165,7 @@ The login page (`/login`) includes one-click quick-fill buttons for each role:
 
 ### Step 13: Customer Self-Service Portal Experience
 1. Click the Logout icon in the navbar.
-2. On `/login`, click **"Fill Customer Credentials"** (`customer@acme.local` / `CustomerPass123!`).
+2. On `/login`, click **"Fill Customer Credentials"** (`customer.acme@example.com` / `CustomerPass123!`).
 3. Click **"Sign In to Console"**.
 4. You are redirected to `/portal/dashboard`:
    - Personalized welcome banner: *Acme Enterprises Ltd*.
@@ -176,13 +176,13 @@ The login page (`/login`) includes one-click quick-fill buttons for each role:
    - Comprehensive searchable archive of all billing statements for Acme Enterprises Ltd.
 
 ### Step 14: Multi-Tenant Customer Data Isolation Verification
-1. As `customer@acme.local`, attempt to directly query Global Dynamics Corp's invoice `INV-202610-GLOB-OVERDUE`:
+1. As `customer.acme@example.com`, attempt to directly query Global Dynamics Corp's invoice `INV-202610-GLOB-OVERDUE`:
    - Via API: `GET /api/v1/invoices/{global_dynamics_inv_id}` with Acme's Bearer token.
    - Result: HTTP `404 Not Found` (tenant-scoped) or `403 Forbidden`.
    - Cross-tenant access is strictly denied; Customer A cannot view, list, or download Customer B's records.
 
 ### Step 15: System Audit Trail & Tamper-Evident Ledger
-1. Sign back in as Administrator (`admin@brightloop.local`).
+1. Sign back in as Administrator (`admin@example.com`).
 2. Navigate to `/admin/audit`.
 3. Filter by Action (`PAYMENT_RECORDED`, `PAYMENT_VOIDED`, `INVOICE_GENERATED`, etc.):
    - View chronological log entries with timestamp, actor ID, IP address, and entity ID.

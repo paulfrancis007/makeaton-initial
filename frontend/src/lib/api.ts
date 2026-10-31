@@ -304,7 +304,28 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     let errorDetail = "An unexpected error occurred.";
     try {
       const errorJson = await response.json();
-      errorDetail = errorJson.detail || JSON.stringify(errorJson);
+      if (typeof errorJson === "string") {
+        errorDetail = errorJson;
+      } else if (Array.isArray(errorJson?.detail)) {
+        // FastAPI / Pydantic validation error list
+        errorDetail = errorJson.detail
+          .map((d: any) => {
+            if (typeof d === "string") return d;
+            const field = Array.isArray(d.loc)
+              ? d.loc.filter((locPart: any) => locPart !== "body").join(".")
+              : "";
+            return field ? `${field}: ${d.msg || JSON.stringify(d)}` : d.msg || JSON.stringify(d);
+          })
+          .join("; ");
+      } else if (typeof errorJson?.detail === "string") {
+        errorDetail = errorJson.detail;
+      } else if (typeof errorJson?.detail === "object" && errorJson.detail !== null) {
+        errorDetail = JSON.stringify(errorJson.detail);
+      } else if (typeof errorJson?.message === "string") {
+        errorDetail = errorJson.message;
+      } else {
+        errorDetail = JSON.stringify(errorJson);
+      }
     } catch {
       errorDetail = `HTTP ${response.status}: ${response.statusText}`;
     }
@@ -312,6 +333,38 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   }
 
   return response.json();
+}
+
+export function formatApiError(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message;
+  }
+  if (typeof err === "string") {
+    return err;
+  }
+  if (typeof err === "object" && err !== null) {
+    if ("detail" in err) {
+      const detail = (err as any).detail;
+      if (typeof detail === "string") return detail;
+      if (Array.isArray(detail)) {
+        return detail
+          .map((d: any) => {
+            if (typeof d === "string") return d;
+            const field = Array.isArray(d.loc)
+              ? d.loc.filter((locPart: any) => locPart !== "body").join(".")
+              : "";
+            return field ? `${field}: ${d.msg || JSON.stringify(d)}` : d.msg || JSON.stringify(d);
+          })
+          .join("; ");
+      }
+      return JSON.stringify(detail);
+    }
+    if ("message" in err && typeof (err as any).message === "string") {
+      return (err as any).message;
+    }
+    return JSON.stringify(err);
+  }
+  return String(err);
 }
 
 // -------------------------------------------------------------
@@ -529,6 +582,8 @@ export interface InvoiceLine {
   taxes: InvoiceLineTax[];
 }
 
+export type PaymentMethod = "CASH" | "BANK_TRANSFER" | "UPI" | "CARD" | "CHEQUE" | "OTHER";
+
 export interface Payment {
   id: string;
   payment_number: string;
@@ -537,7 +592,7 @@ export interface Payment {
   customer_name?: string | null;
   invoice_number?: string | null;
   amount: string;
-  payment_method: "CASH" | "BANK_TRANSFER" | "UPI" | "CARD" | "CHEQUE" | "OTHER";
+  payment_method: PaymentMethod;
   status: "SUCCESS" | "VOIDED";
   payment_date: string;
   reference_number?: string | null;
@@ -583,6 +638,11 @@ export interface InvoiceDetail extends Invoice {
 }
 
 export interface AdminDashboardData {
+  period?: {
+    start_date: string;
+    end_date: string;
+  };
+  overview?: Record<string, any>;
   metrics: {
     total_customers: number;
     active_customers: number;
@@ -594,6 +654,11 @@ export interface AdminDashboardData {
     overdue_amount: number;
     invoices_count: number;
     overdue_invoices_count: number;
+    subscriptions_due_for_billing?: number;
+    total_invoiced_amount?: number;
+    total_payments_collected?: number;
+    outstanding_balance?: number;
+    payments_in_selected_range?: number;
   };
   recent_invoices: Array<{
     id: string;
@@ -603,6 +668,7 @@ export interface AdminDashboardData {
     balance_due: number;
     status: string;
     issue_date: string;
+    due_date?: string;
   }>;
   recent_payments: Array<{
     id: string;
@@ -611,6 +677,7 @@ export interface AdminDashboardData {
     payment_method: string;
     amount: number;
     status: string;
+    invoice_number?: string | null;
   }>;
 }
 
@@ -743,7 +810,7 @@ export const invoiceApi = {
 };
 
 export const paymentApi = {
-  listPayments: (params?: { invoice_id?: string; customer_id?: string; status?: string; payment_method?: string; method?: string; page?: number; size?: number; page_size?: number }) => {
+  listPayments: (params?: { invoice_id?: string; customer_id?: string; status?: string; payment_method?: PaymentMethod | string; method?: PaymentMethod | string; page?: number; size?: number; page_size?: number }) => {
     const query = new URLSearchParams();
     if (params?.invoice_id) query.append("invoice_id", params.invoice_id);
     if (params?.customer_id) query.append("customer_id", params.customer_id);
@@ -756,10 +823,10 @@ export const paymentApi = {
     return request<PaginatedResult<Payment>>(`/payments/?${query.toString()}`);
   },
   getPayment: (id: string) => request<Payment>(`/payments/${id}`),
-  recordPayment: (data: { invoice_id: string; amount: number | string; payment_method: string; reference_number?: string; notes?: string }) => {
+  recordPayment: (data: { invoice_id: string; amount: number | string; payment_method: PaymentMethod | string; reference_number?: string; notes?: string }) => {
     return request<Payment>("/payments/", { method: "POST", body: JSON.stringify(data) });
   },
-  createPayment: (data: { invoice_id: string; amount: number | string; payment_method: string; reference_number?: string; notes?: string }) => {
+  createPayment: (data: { invoice_id: string; amount: number | string; payment_method: PaymentMethod | string; reference_number?: string; notes?: string }) => {
     return request<Payment>("/payments/", { method: "POST", body: JSON.stringify(data) });
   },
   voidPayment: (id: string, void_reason: string) => {

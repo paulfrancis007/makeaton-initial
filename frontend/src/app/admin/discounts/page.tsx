@@ -13,6 +13,7 @@ import {
   X,
   Calculator,
   ArrowRight,
+  RefreshCw,
 } from "lucide-react";
 import {
   catalogApi,
@@ -204,77 +205,84 @@ export default function DiscountsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="bg-white border-2 sm:border-3 border-nb-dark p-6 shadow-nb flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-indigo-600">
-            <Percent className="h-6 w-6" />
-            <h1 className="text-2xl font-bold text-slate-900">Discount Rules & Engine</h1>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-nb-purple text-nb-dark border-2 border-nb-dark text-[10px] font-black uppercase tracking-wider shadow-nb-sm mb-2">
+            Discount Engine
           </div>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight flex items-center gap-2.5 text-nb-dark">
+            <Percent className="h-7 w-7 stroke-[2.5]" />
+            Discount Rules & Engine
+          </h1>
+          <p className="text-xs font-bold text-zinc-600 mt-1">
             Configure promotional percentage and fixed discounts, scope boundaries, cycle frequencies, usage quotas, and test calculations.
           </p>
         </div>
         <button
           onClick={openCreateModal}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition"
+          className="nb-btn nb-btn-primary inline-flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 stroke-[2.5]" />
           New Discount Rule
         </button>
       </div>
 
       {/* Interactive Discount Evaluator Widget */}
-      <div className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-xl p-5 shadow-md">
-        <div className="flex items-center gap-2 mb-3">
-          <Calculator className="h-5 w-5 text-indigo-400" />
-          <h3 className="font-semibold text-sm">Interactive Discount Evaluator</h3>
-          <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30">
-            Real-time Calculation Engine
-          </span>
+      <div className="bg-nb-yellow text-nb-dark border-2 sm:border-3 border-nb-dark p-6 shadow-nb-lg">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="h-8 w-8 bg-white border-2 border-nb-dark flex items-center justify-center shadow-nb-sm">
+            <Calculator className="h-5 w-5 stroke-[2.5]" />
+          </div>
+          <div>
+            <h3 className="font-black text-sm uppercase tracking-tight">Interactive Discount Evaluator</h3>
+            <span className="text-[10px] bg-white text-nb-dark font-black uppercase px-2 py-0.5 border border-nb-dark shadow-nb-sm inline-block mt-0.5">
+              Real-time Rule Engine Simulator
+            </span>
+          </div>
         </div>
 
         <form onSubmit={handleEvaluate} className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
           <div>
-            <label className="block text-xs text-slate-300 mb-1">Discount Code</label>
+            <label className="block text-xs font-black uppercase tracking-wider mb-1">Discount Code</label>
             <input
               type="text"
               required
               placeholder="e.g. SUMMER20"
               value={evalCode}
               onChange={(e) => setEvalCode(e.target.value.toUpperCase())}
-              className="w-full px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs font-mono uppercase focus:ring-2 focus:ring-indigo-400"
+              className="nb-input w-full px-3 py-2 text-xs font-mono uppercase font-black bg-white"
             />
           </div>
           <div>
-            <label className="block text-xs text-slate-300 mb-1">Order Subtotal (₹)</label>
+            <label className="block text-xs font-black uppercase tracking-wider mb-1">Order Subtotal (₹)</label>
             <input
               type="number"
               step="0.0001"
               required
               value={evalSubtotal}
               onChange={(e) => setEvalSubtotal(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs font-mono focus:ring-2 focus:ring-indigo-400"
+              className="nb-input w-full px-3 py-2 text-xs font-mono font-black bg-white"
             />
           </div>
           <div>
-            <label className="block text-xs text-slate-300 mb-1">Billing Cycle #</label>
+            <label className="block text-xs font-black uppercase tracking-wider mb-1">Billing Cycle #</label>
             <input
               type="number"
               min="1"
               required
               value={evalCycle}
               onChange={(e) => setEvalCycle(Number(e.target.value))}
-              className="w-full px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs font-mono focus:ring-2 focus:ring-indigo-400"
+              className="nb-input w-full px-3 py-2 text-xs font-mono font-black bg-white"
             />
           </div>
           <div>
             <button
               type="submit"
               disabled={evaluating}
-              className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition shadow-xs disabled:opacity-50"
+              className="w-full nb-btn nb-btn-white py-2 text-xs font-black uppercase flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               {evaluating ? "Evaluating..." : "Evaluate Code"}
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-4 w-4 stroke-[2.5]" />
             </button>
           </div>
         </form>
@@ -282,27 +290,27 @@ export default function DiscountsPage() {
         {/* Evaluation Output */}
         {evalResult && (
           <div
-            className={`mt-4 p-3 rounded-lg border text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+            className={`mt-4 p-4 border-2 border-nb-dark shadow-nb-sm text-xs font-bold flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
               evalResult.is_eligible
-                ? "bg-emerald-950/40 border-emerald-500/40 text-emerald-200"
-                : "bg-red-950/40 border-red-500/40 text-red-200"
+                ? "bg-nb-green text-nb-dark"
+                : "bg-nb-coral text-white"
             }`}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {evalResult.is_eligible ? (
-                <CheckCircle className="h-5 w-5 text-emerald-400 shrink-0" />
+                <CheckCircle className="h-6 w-6 stroke-[2.5] shrink-0" />
               ) : (
-                <XCircle className="h-5 w-5 text-red-400 shrink-0" />
+                <XCircle className="h-6 w-6 stroke-[2.5] shrink-0" />
               )}
               <div>
-                <span className="font-bold">
+                <span className="font-black uppercase tracking-wider text-sm">
                   {evalResult.is_eligible ? "Eligible" : "Ineligible"}
                 </span>
                 {evalResult.rule_name && (
-                  <span className="text-slate-300 ml-1.5">({evalResult.rule_name})</span>
+                  <span className="ml-2">({evalResult.rule_name})</span>
                 )}
                 {evalResult.rejection_reason && (
-                  <div className="text-[11px] text-red-300 mt-0.5">
+                  <div className="text-[11px] font-mono mt-1">
                     Reason: {evalResult.rejection_reason}
                   </div>
                 )}
@@ -310,16 +318,16 @@ export default function DiscountsPage() {
             </div>
 
             {evalResult.is_eligible && (
-              <div className="flex items-center gap-4 border-t sm:border-t-0 sm:border-l border-emerald-500/30 pt-2 sm:pt-0 sm:pl-4">
+              <div className="flex items-center gap-6 border-t sm:border-t-0 sm:border-l-2 border-nb-dark pt-2 sm:pt-0 sm:pl-6">
                 <div>
-                  <span className="text-[10px] text-emerald-300 uppercase block">Discount</span>
-                  <span className="font-mono text-sm font-bold text-white">
+                  <span className="text-[10px] uppercase font-black block">Discount</span>
+                  <span className="font-mono text-base font-black">
                     ₹{Number(evalResult.discount_amount).toFixed(2)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-emerald-300 uppercase block">Net Subtotal</span>
-                  <span className="font-mono text-sm font-bold text-white">
+                  <span className="text-[10px] uppercase font-black block">Net Subtotal</span>
+                  <span className="font-mono text-base font-black">
                     ₹{(Number(evalSubtotal) - Number(evalResult.discount_amount)).toFixed(2)}
                   </span>
                 </div>
@@ -329,16 +337,16 @@ export default function DiscountsPage() {
         )}
 
         {evalError && (
-          <div className="mt-3 p-2 bg-red-900/50 border border-red-700 rounded text-xs text-red-200">
+          <div className="mt-3 p-3 bg-nb-coral border-2 border-nb-dark text-white text-xs font-bold shadow-nb-sm">
             {evalError}
           </div>
         )}
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row gap-3">
+      <div className="bg-white p-4 border-2 sm:border-3 border-nb-dark shadow-nb flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-nb-dark stroke-[2.5]" />
           <input
             type="text"
             placeholder="Search by discount code or name..."
@@ -347,7 +355,7 @@ export default function DiscountsPage() {
               setSearchTerm(e.target.value);
               setPage(1);
             }}
-            className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="nb-input w-full pl-9 pr-4 py-2 text-xs bg-white font-bold"
           />
         </div>
         <select
@@ -356,7 +364,7 @@ export default function DiscountsPage() {
             setTypeFilter(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="nb-input px-3 py-2 text-xs bg-white font-bold"
         >
           <option value="">All Types</option>
           <option value="PERCENTAGE">PERCENTAGE</option>
@@ -368,7 +376,7 @@ export default function DiscountsPage() {
             setScopeFilter(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="nb-input px-3 py-2 text-xs bg-white font-bold"
         >
           <option value="">All Scopes</option>
           <option value="ORDER">ORDER</option>
@@ -380,7 +388,7 @@ export default function DiscountsPage() {
             setStatusFilter(e.target.value);
             setPage(1);
           }}
-          className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="nb-input px-3 py-2 text-xs bg-white font-bold"
         >
           <option value="">All Statuses</option>
           <option value="true">Active Only</option>
@@ -389,87 +397,90 @@ export default function DiscountsPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700 text-sm">
-          <AlertCircle className="h-5 w-5 shrink-0" />
+        <div className="p-3.5 bg-nb-coral text-white border-2 border-nb-dark shadow-nb flex items-center gap-2.5 text-xs font-bold">
+          <AlertCircle className="h-5 w-5 stroke-[2.5] shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Discount Table */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+      <div className="bg-white border-2 sm:border-3 border-nb-dark shadow-nb overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-400 text-sm">Loading discount rules...</div>
+          <div className="py-20 text-center text-xs font-black uppercase tracking-wider text-nb-dark flex flex-col items-center gap-3">
+            <RefreshCw className="h-7 w-7 animate-spin stroke-[2.5] text-nb-dark" />
+            Loading discount rules...
+          </div>
         ) : discounts.length === 0 ? (
-          <div className="p-12 text-center">
-            <Percent className="h-10 w-10 text-slate-300 mx-auto mb-2" />
-            <h3 className="text-sm font-semibold text-slate-700">No discount rules found</h3>
-            <p className="text-xs text-slate-500 mt-1">Create promotional coupons and volume discount rules above.</p>
+          <div className="py-20 text-center text-nb-dark flex flex-col items-center">
+            <Percent className="h-12 w-12 stroke-[2] mb-3 text-zinc-400" />
+            <h3 className="font-black uppercase tracking-wide text-base">No discount rules found</h3>
+            <p className="text-xs font-bold text-zinc-500 mt-1">Create promotional coupons and volume discount rules above.</p>
           </div>
         ) : (
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
-            <thead className="bg-slate-50 text-slate-600 font-medium">
+          <table className="w-full text-left text-xs font-bold">
+            <thead className="bg-nb-dark text-white font-black uppercase tracking-wider border-b-2 border-nb-dark text-[11px]">
               <tr>
-                <th className="px-6 py-3 text-left">Code & Name</th>
-                <th className="px-6 py-3 text-left">Type & Value</th>
-                <th className="px-6 py-3 text-left">Scope & Frequency</th>
-                <th className="px-6 py-3 text-center">Usage</th>
-                <th className="px-6 py-3 text-center">Status</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th className="px-5 py-3 text-left">Code & Name</th>
+                <th className="px-5 py-3 text-left">Type & Value</th>
+                <th className="px-5 py-3 text-left">Scope & Frequency</th>
+                <th className="px-5 py-3 text-center">Usage</th>
+                <th className="px-5 py-3 text-center">Status</th>
+                <th className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y-2 divide-nb-dark text-nb-dark">
               {discounts.map((d) => (
-                <tr key={d.id} className="hover:bg-slate-50/75 transition">
-                  <td className="px-6 py-4">
-                    <div className="font-mono font-bold text-indigo-700">{d.code}</div>
-                    <div className="text-xs text-slate-500 line-clamp-1">{d.name}</div>
+                <tr key={d.id} className="hover:bg-cream transition-colors">
+                  <td className="px-5 py-4">
+                    <div className="font-mono font-black text-sm text-nb-dark">{d.code}</div>
+                    <div className="text-[11px] text-zinc-600 line-clamp-1 font-normal mt-0.5">{d.name}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="font-semibold text-slate-900 font-mono">
+                  <td className="px-5 py-4">
+                    <div className="font-black text-sm text-nb-dark font-mono">
                       {d.discount_type === "PERCENTAGE"
                         ? `${Number(d.discount_value).toFixed(2)}%`
                         : `₹${Number(d.discount_value).toFixed(2)}`}
                     </div>
-                    <div className="text-[11px] text-slate-400 uppercase">{d.discount_type}</div>
+                    <div className="text-[10px] text-zinc-500 uppercase font-black">{d.discount_type}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200 block w-fit mb-1">
+                  <td className="px-5 py-4">
+                    <span className="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider bg-cream border border-nb-dark shadow-nb-sm block w-fit mb-1">
                       {d.scope}
                     </span>
-                    <span className="text-[11px] text-slate-500 block">
+                    <span className="text-[10px] text-zinc-600 block font-bold">
                       {d.application_frequency}
                       {d.max_cycles ? ` (${d.max_cycles} cycles)` : ""}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center font-mono text-xs">
+                  <td className="px-5 py-4 text-center font-mono font-bold text-xs">
                     {d.current_uses} / {d.max_uses !== null ? d.max_uses : "∞"}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-5 py-4 text-center">
                     {d.is_active ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                        <CheckCircle className="h-3 w-3" /> Active
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-nb-green text-nb-dark px-2 py-0.5 border border-nb-dark shadow-nb-sm">
+                        <CheckCircle className="h-3 w-3 stroke-[2.5]" /> Active
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                        <XCircle className="h-3 w-3" /> Inactive
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-zinc-200 text-zinc-700 px-2 py-0.5 border border-nb-dark shadow-nb-sm">
+                        <XCircle className="h-3 w-3 stroke-[2.5]" /> Inactive
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-right space-x-2">
+                  <td className="px-5 py-4 text-right space-x-2">
                     <button
                       onClick={() => openEditModal(d)}
-                      className="text-slate-400 hover:text-slate-700 p-1 transition"
+                      className="nb-btn nb-btn-white p-1.5"
                       title="Edit Discount Rule"
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Edit2 className="h-3.5 w-3.5 stroke-[2.5]" />
                     </button>
                     {d.is_active && (
                       <button
                         onClick={() => handleDeactivateDiscount(d)}
-                        className="text-red-400 hover:text-red-600 p-1 transition"
+                        className="nb-btn p-1.5 bg-nb-coral text-white"
                         title="Deactivate Discount Rule"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5 stroke-[2.5]" />
                       </button>
                     )}
                   </td>
@@ -481,20 +492,20 @@ export default function DiscountsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+          <div className="px-5 py-3 border-t-2 border-nb-dark bg-cream flex items-center justify-between text-xs font-black uppercase tracking-wider">
             <div>Page {page} of {totalPages}</div>
-            <div className="space-x-1">
+            <div className="flex gap-2">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="px-2.5 py-1 border border-slate-200 rounded disabled:opacity-40 hover:bg-slate-50"
+                className="nb-btn nb-btn-white px-3 py-1 text-xs disabled:opacity-40"
               >
                 Previous
               </button>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => p + 1)}
-                className="px-2.5 py-1 border border-slate-200 rounded disabled:opacity-40 hover:bg-slate-50"
+                className="nb-btn nb-btn-white px-3 py-1 text-xs disabled:opacity-40"
               >
                 Next
               </button>
@@ -505,19 +516,19 @@ export default function DiscountsPage() {
 
       {/* Discount Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-xl w-full p-6 shadow-xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h2 className="text-lg font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border-2 sm:border-3 border-nb-dark max-w-xl w-full p-6 shadow-nb-xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b-2 border-nb-dark pb-3">
+              <h2 className="text-lg font-black uppercase tracking-tight text-nb-dark">
                 {editingDiscount ? "Edit Discount Rule" : "Create Discount Rule"}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="h-5 w-5" />
+              <button onClick={() => setIsModalOpen(false)} className="nb-btn nb-btn-white p-1 text-nb-dark">
+                <X className="h-5 w-5 stroke-[2.5]" />
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
+              <div className="p-3 bg-nb-coral border-2 border-nb-dark text-white text-xs font-bold shadow-nb-sm">
                 {formError}
               </div>
             )}
@@ -525,7 +536,7 @@ export default function DiscountsPage() {
             <form onSubmit={handleSaveDiscount} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Coupon / Rule Code *
                   </label>
                   <input
@@ -535,11 +546,11 @@ export default function DiscountsPage() {
                     placeholder="e.g. FLASH50"
                     value={formCode}
                     onChange={(e) => setFormCode(e.target.value.toUpperCase())}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono uppercase focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-100"
+                    className="nb-input w-full p-2.5 text-xs font-mono uppercase font-black bg-white disabled:bg-zinc-100"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Rule Name *
                   </label>
                   <input
@@ -548,27 +559,27 @@ export default function DiscountsPage() {
                     placeholder="e.g. 50% Flash Sale"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs bg-white font-bold"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Discount Type *
                   </label>
                   <select
                     value={formType}
                     onChange={(e) => setFormType(e.target.value as "PERCENTAGE" | "FIXED_AMOUNT")}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs bg-white font-bold"
                   >
                     <option value="PERCENTAGE">PERCENTAGE</option>
                     <option value="FIXED_AMOUNT">FIXED_AMOUNT</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Discount Value {formType === "PERCENTAGE" ? "(%)" : "(₹)"} *
                   </label>
                   <input
@@ -579,33 +590,33 @@ export default function DiscountsPage() {
                     required
                     value={formValue}
                     onChange={(e) => setFormValue(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs font-mono font-black bg-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Discount Scope *
                   </label>
                   <select
                     value={formScope}
                     onChange={(e) => setFormScope(e.target.value as "ORDER" | "PRODUCT_SELECTION")}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs bg-white font-bold"
                   >
                     <option value="ORDER">ORDER (All products)</option>
                     <option value="PRODUCT_SELECTION">PRODUCT_SELECTION (Specific items)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Application Frequency *
                   </label>
                   <select
                     value={formFrequency}
                     onChange={(e) => setFormFrequency(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs bg-white font-bold"
                   >
                     <option value="FIRST_INVOICE_ONLY">FIRST_INVOICE_ONLY</option>
                     <option value="RECURRING_ALL_CYCLES">RECURRING_ALL_CYCLES</option>
@@ -616,7 +627,7 @@ export default function DiscountsPage() {
 
               {formFrequency === "FINITE_CYCLES" && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Max Cycles *
                   </label>
                   <input
@@ -626,22 +637,22 @@ export default function DiscountsPage() {
                     placeholder="e.g. 3"
                     value={formMaxCycles}
                     onChange={(e) => setFormMaxCycles(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs font-bold bg-white"
                   />
                 </div>
               )}
 
               {/* Product Selection picker */}
               {formScope === "PRODUCT_SELECTION" && (
-                <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
-                  <label className="block text-xs font-semibold text-slate-700">
+                <div className="bg-cream p-3.5 border-2 border-nb-dark shadow-nb-sm space-y-2">
+                  <label className="block text-xs font-black uppercase tracking-wider text-nb-dark">
                     Eligible Products (select at least one)
                   </label>
-                  <div className="max-h-36 overflow-y-auto space-y-1.5 border border-slate-200 rounded p-2 bg-white">
+                  <div className="max-h-36 overflow-y-auto space-y-1.5 border-2 border-nb-dark p-2.5 bg-white">
                     {availableProducts.map((p) => {
                       const isChecked = formEligibleProductIds.includes(p.id);
                       return (
-                        <label key={p.id} className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                        <label key={p.id} className="flex items-center gap-2 text-xs font-bold text-nb-dark cursor-pointer">
                           <input
                             type="checkbox"
                             checked={isChecked}
@@ -652,7 +663,7 @@ export default function DiscountsPage() {
                                 setFormEligibleProductIds(formEligibleProductIds.filter((id) => id !== p.id));
                               }
                             }}
-                            className="rounded text-indigo-600 focus:ring-indigo-500"
+                            className="accent-nb-dark h-4 w-4 rounded-none border-2 border-nb-dark"
                           />
                           <span>{p.name} ({p.product_type})</span>
                         </label>
@@ -664,7 +675,7 @@ export default function DiscountsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Minimum Purchase Amount (₹)
                   </label>
                   <input
@@ -673,11 +684,11 @@ export default function DiscountsPage() {
                     min="0"
                     value={formMinPurchase}
                     onChange={(e) => setFormMinPurchase(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs font-mono font-black bg-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Minimum Quantity
                   </label>
                   <input
@@ -685,36 +696,36 @@ export default function DiscountsPage() {
                     min="1"
                     value={formMinQty}
                     onChange={(e) => setFormMinQty(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2.5 text-xs font-bold bg-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Valid From (optional)
                   </label>
                   <input
                     type="datetime-local"
                     value={formValidFrom}
                     onChange={(e) => setFormValidFrom(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2 text-xs font-mono font-bold bg-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Valid Until (optional)
                   </label>
                   <input
                     type="datetime-local"
                     value={formValidUntil}
                     onChange={(e) => setFormValidUntil(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2 text-xs font-mono font-bold bg-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-black uppercase tracking-wider mb-1">
                     Max Global Uses (optional)
                   </label>
                   <input
@@ -723,23 +734,23 @@ export default function DiscountsPage() {
                     placeholder="Unlimited"
                     value={formMaxUses}
                     onChange={(e) => setFormMaxUses(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500"
+                    className="nb-input w-full p-2 text-xs font-bold bg-white"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-2.5 pt-3 border-t-2 border-nb-dark">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 hover:bg-slate-50"
+                  className="nb-btn nb-btn-white px-3.5 py-2 text-xs font-black uppercase"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-xs disabled:opacity-50"
+                  className="nb-btn nb-btn-primary px-4 py-2 text-xs font-black uppercase disabled:opacity-50"
                 >
                   {formSubmitting ? "Saving..." : editingDiscount ? "Update Rule" : "Create Rule"}
                 </button>

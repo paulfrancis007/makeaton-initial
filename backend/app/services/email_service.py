@@ -37,13 +37,13 @@ def send_invoice_email(
         }
 
     company = db.query(CompanySetting).filter(CompanySetting.id == 1).first()
-    sender_name = getattr(settings, "EMAILS_FROM_NAME", "Brightloop Billing")
-    sender_email = getattr(settings, "EMAILS_FROM_EMAIL", "billing@brightloop.local")
-    smtp_host = getattr(settings, "SMTP_HOST", None)
-    smtp_port = getattr(settings, "SMTP_PORT", 1025)
-    smtp_user = getattr(settings, "SMTP_USER", None)
-    smtp_password = getattr(settings, "SMTP_PASSWORD", None)
-    smtp_tls = getattr(settings, "SMTP_TLS", False)
+    sender_name = settings.EMAILS_FROM_NAME
+    sender_email = settings.EMAILS_FROM_EMAIL
+    smtp_host = settings.SMTP_HOST.strip() if settings.SMTP_HOST else None
+    smtp_port = settings.SMTP_PORT
+    smtp_user = settings.SMTP_USER.strip() if settings.SMTP_USER else None
+    smtp_password = settings.SMTP_PASSWORD
+    smtp_tls = settings.SMTP_TLS
 
     # 1. Generate PDF document
     try:
@@ -78,7 +78,32 @@ def send_invoice_email(
             "error": "SMTP_NOT_CONFIGURED",
         }
 
-    # 3. Construct MIME message
+    # 3. Validate sender email when SMTP delivery is enabled
+    cleaned_sender = (sender_email or "").strip().lower()
+    if not cleaned_sender or cleaned_sender == "billing@brightloop.local" or cleaned_sender.endswith("@brightloop.local") or cleaned_sender.endswith(".local"):
+        logger.warning(
+            f"SMTP delivery is enabled (host={smtp_host}), but EMAILS_FROM_EMAIL is set to default or invalid '{sender_email}'. Real delivery blocked."
+        )
+        log_audit_event(
+            db=db,
+            action="INVOICE_EMAIL_FAILED",
+            entity_name="Invoice",
+            entity_id=invoice.id,
+            actor_user_id=actor_user.id if actor_user else None,
+            ip_address=ip_address,
+            details={
+                "recipient": to_email,
+                "reason": f"A valid sender email (EMAILS_FROM_EMAIL) must be configured when SMTP is enabled. Current value: {sender_email}",
+            },
+        )
+        db.commit()
+        return {
+            "sent": False,
+            "message": "A verified sender email address (EMAILS_FROM_EMAIL) is required for SMTP delivery.",
+            "error": "INVALID_SENDER_EMAIL",
+        }
+
+    # 4. Construct MIME message
     msg = MIMEMultipart()
     msg["From"] = f"{sender_name} <{sender_email}>"
     msg["To"] = to_email
@@ -107,9 +132,9 @@ Warm regards,
     part.add_header("Content-Disposition", f"attachment; filename=Invoice-{invoice.invoice_number}.pdf")
     msg.attach(part)
 
-    # 4. Attempt delivery
+    # 5. Attempt delivery
     try:
-        with smtplib.SMTP(smtp_host, smtp_port, timeout=5) as server:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as server:
             if smtp_tls:
                 server.starttls()
             if smtp_user and smtp_password:
@@ -131,6 +156,40 @@ Warm regards,
             "sent": True,
             "message": f"Invoice email sent successfully to {to_email}.",
             "recipient": to_email,
+        }
+    except smtplib.SMTPAuthenticationError as e:
+        logger.error(f"SMTP authentication failed for host {smtp_host}: code={getattr(e, 'smtp_code', 'unknown')}")
+        log_audit_event(
+            db=db,
+            action="INVOICE_EMAIL_FAILED",
+            entity_name="Invoice",
+            entity_id=invoice.id,
+            actor_user_id=actor_user.id if actor_user else None,
+            ip_address=ip_address,
+            details={"recipient": to_email, "error": "SMTP authentication failed. Verify credentials."},
+        )
+        db.commit()
+        return {
+            "sent": False,
+            "message": "SMTP authentication failed. Please verify email credentials.",
+            "error": "SMTP_AUTHENTICATION_ERROR",
+        }
+    except smtplib.SMTPException as e:
+        logger.warning(f"SMTP delivery error for {to_email}: {e}")
+        log_audit_event(
+            db=db,
+            action="INVOICE_EMAIL_FAILED",
+            entity_name="Invoice",
+            entity_id=invoice.id,
+            actor_user_id=actor_user.id if actor_user else None,
+            ip_address=ip_address,
+            details={"recipient": to_email, "error": f"SMTP delivery error: {str(e)}"},
+        )
+        db.commit()
+        return {
+            "sent": False,
+            "message": f"Could not send email due to SMTP error: {e}. Invoice PDF remains available for download.",
+            "error": str(e),
         }
     except Exception as e:
         logger.warning(f"Failed to deliver invoice email to {to_email}: {e}")

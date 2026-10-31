@@ -3,11 +3,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
   ShieldAlert,
-  Search,
   RefreshCw,
-  Clock,
-  User,
-  Database,
   FileCode,
 } from "lucide-react";
 import { auditApi, AuditLog } from "@/lib/api";
@@ -49,34 +45,37 @@ export default function AdminAuditPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="bg-white border-2 sm:border-3 border-nb-dark p-6 shadow-nb flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <ShieldAlert className="h-6 w-6 text-indigo-600" />
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-nb-dark text-white border-2 border-nb-dark text-[10px] font-black uppercase tracking-wider shadow-nb-sm mb-2">
+            Tamper-Evident Trail
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight flex items-center gap-2.5 text-nb-dark">
+            <ShieldAlert className="h-7 w-7 stroke-[2.5]" />
             System Audit Trail
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs font-bold text-zinc-600 mt-1">
             Immutable security log recording financial transactions, billing runs, authorizations and administrative actions.
           </p>
         </div>
         <button
           onClick={() => loadLogs()}
-          className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 self-start sm:self-auto"
+          className="nb-btn nb-btn-white p-2.5 text-nb-dark self-start sm:self-auto"
           title="Refresh logs"
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-4 w-4 stroke-[2.5] ${loading ? "animate-spin" : ""}`} />
         </button>
       </div>
 
       {/* Filters Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-wrap gap-3 items-center">
+      <div className="bg-white p-4 border-2 sm:border-3 border-nb-dark shadow-nb flex flex-wrap gap-3 items-center">
         <select
           value={actionFilter}
           onChange={(e) => {
             setActionFilter(e.target.value);
             setPage(1);
           }}
-          className="text-xs rounded-lg border border-slate-300 py-1.5 px-3 focus:ring-2 focus:ring-indigo-500"
+          className="nb-input text-xs py-2 px-3 bg-white font-bold"
         >
           <option value="">All Actions</option>
           <option value="PAYMENT_RECORDED">PAYMENT_RECORDED</option>
@@ -93,7 +92,7 @@ export default function AdminAuditPage() {
             setEntityFilter(e.target.value);
             setPage(1);
           }}
-          className="text-xs rounded-lg border border-slate-300 py-1.5 px-3 focus:ring-2 focus:ring-indigo-500"
+          className="nb-input text-xs py-2 px-3 bg-white font-bold"
         >
           <option value="">All Entities</option>
           <option value="invoice">invoice</option>
@@ -104,26 +103,26 @@ export default function AdminAuditPage() {
       </div>
 
       {/* Audit Log Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white border-2 sm:border-3 border-nb-dark shadow-nb overflow-hidden">
         {loading ? (
-          <div className="py-12 text-center text-sm text-slate-500 flex flex-col items-center gap-2">
-            <RefreshCw className="h-5 w-5 animate-spin text-indigo-600" />
+          <div className="py-20 text-center text-xs font-black uppercase tracking-wider text-nb-dark flex flex-col items-center gap-3">
+            <RefreshCw className="h-7 w-7 animate-spin stroke-[2.5] text-nb-dark" />
             Loading audit records...
           </div>
         ) : error ? (
-          <div className="p-6 text-center text-rose-600 text-sm">{error}</div>
+          <div className="p-6 text-center text-white bg-nb-coral text-xs font-bold">{error}</div>
         ) : logs.length === 0 ? (
-          <div className="py-16 text-center text-slate-500 flex flex-col items-center">
-            <ShieldAlert className="h-10 w-10 text-slate-300 mb-2" />
-            <p className="font-semibold text-slate-700 text-base">No audit events found</p>
-            <p className="text-xs text-slate-400 mt-1">
+          <div className="py-20 text-center text-nb-dark flex flex-col items-center">
+            <ShieldAlert className="h-12 w-12 stroke-[2] mb-3 text-zinc-400" />
+            <p className="font-black uppercase tracking-wide text-base">No audit events found</p>
+            <p className="text-xs font-bold text-zinc-500 mt-1">
               Events will be appended automatically as system operations take place.
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+            <table className="w-full text-left text-xs font-bold">
+              <thead className="bg-nb-dark text-white font-black uppercase tracking-wider border-b-2 border-nb-dark text-[11px]">
                 <tr>
                   <th className="py-3 px-4">Timestamp</th>
                   <th className="py-3 px-4">Action</th>
@@ -133,32 +132,32 @@ export default function AdminAuditPage() {
                   <th className="py-3 px-4 text-right">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y-2 divide-nb-dark text-nb-dark">
                 {logs.map((log) => {
                   const isExpanded = expandedLogId === log.id;
                   return (
                     <React.Fragment key={log.id}>
-                      <tr className="hover:bg-slate-50/60 transition">
-                        <td className="py-3 px-4 font-mono text-slate-500 whitespace-nowrap">
+                      <tr className="hover:bg-cream transition-colors">
+                        <td className="py-3 px-4 font-mono text-zinc-600 whitespace-nowrap">
                           {new Date(log.created_at).toLocaleString()}
                         </td>
                         <td className="py-3 px-4">
-                          <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                          <span className="px-2 py-0.5 text-[11px] font-mono font-black uppercase bg-nb-yellow text-nb-dark border border-nb-dark shadow-nb-sm">
                             {log.action}
                           </span>
                         </td>
-                        <td className="py-3 px-4 font-mono text-slate-700">
+                        <td className="py-3 px-4 font-mono font-black">
                           {log.entity_name}
                           {log.entity_id && (
-                            <span className="block text-[10px] text-slate-400">
+                            <span className="block text-[10px] text-zinc-500 font-normal">
                               {log.entity_id}
                             </span>
                           )}
                         </td>
-                        <td className="py-3 px-4 font-mono text-slate-500 text-[11px]">
+                        <td className="py-3 px-4 font-mono text-zinc-600 text-[11px]">
                           {log.actor_user_id ? log.actor_user_id.slice(0, 8) + "..." : "SYSTEM"}
                         </td>
-                        <td className="py-3 px-4 font-mono text-slate-500">
+                        <td className="py-3 px-4 font-mono text-zinc-600">
                           {log.ip_address || "—"}
                         </td>
                         <td className="py-3 px-4 text-right">
@@ -166,17 +165,17 @@ export default function AdminAuditPage() {
                             onClick={() =>
                               setExpandedLogId(isExpanded ? null : log.id)
                             }
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded border border-slate-200 text-slate-600 hover:bg-slate-100 text-[11px]"
+                            className="nb-btn nb-btn-white inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-black uppercase"
                           >
-                            <FileCode className="h-3 w-3" />
+                            <FileCode className="h-3.5 w-3.5 stroke-[2.5]" />
                             {isExpanded ? "Hide" : "Payload"}
                           </button>
                         </td>
                       </tr>
                       {isExpanded && (
-                        <tr className="bg-slate-50">
-                          <td colSpan={6} className="p-4 border-b border-slate-200">
-                            <pre className="p-3 bg-slate-900 text-slate-100 rounded-lg text-[11px] font-mono overflow-x-auto max-h-60">
+                        <tr className="bg-cream">
+                          <td colSpan={6} className="p-4 border-b-2 border-nb-dark">
+                            <pre className="p-4 bg-nb-dark text-nb-green border-2 border-nb-dark shadow-nb-sm text-xs font-mono overflow-x-auto max-h-60 font-bold">
                               {JSON.stringify(log.details, null, 2)}
                             </pre>
                           </td>
@@ -192,22 +191,22 @@ export default function AdminAuditPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+          <div className="px-4 py-3 border-t-2 border-nb-dark bg-cream flex items-center justify-between text-xs font-black uppercase tracking-wider">
             <span>
               Page {page} of {totalPages}
             </span>
-            <div className="flex gap-1">
+            <div className="flex gap-2">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="px-2.5 py-1 rounded border border-slate-200 disabled:opacity-40 hover:bg-slate-50"
+                className="nb-btn nb-btn-white px-3 py-1 text-xs disabled:opacity-40"
               >
                 Previous
               </button>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => p + 1)}
-                className="px-2.5 py-1 rounded border border-slate-200 disabled:opacity-40 hover:bg-slate-50"
+                className="nb-btn nb-btn-white px-3 py-1 text-xs disabled:opacity-40"
               >
                 Next
               </button>

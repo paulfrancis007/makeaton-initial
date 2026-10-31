@@ -350,3 +350,82 @@ def test_customer_payment_restrictions(client: TestClient, db_session: Session):
         },
     )
     assert cust_pay_resp.status_code == 403
+
+
+def test_payment_method_card_success_and_credit_card_rejected(client: TestClient, db_session: Session):
+    """Verify that selecting Credit Card submits CARD (accepted HTTP 201) and CREDIT_CARD is rejected (HTTP 422)."""
+    admin_user, admin_token = create_user_with_token(db_session, "ADMIN")
+    admin_headers = {"Authorization": f"Bearer {admin_token}"}
+    staff_user, staff_token = create_user_with_token(db_session, "STAFF")
+    staff_headers = {"Authorization": f"Bearer {staff_token}"}
+    suffix = uuid.uuid4().hex[:6]
+
+    customer = create_test_customer(db_session, suffix)
+    plan_resp = client.post(
+        "/api/v1/plans/",
+        headers=admin_headers,
+        json={
+            "name": f"Card Test Plan {suffix}",
+            "code": f"CARD-{suffix}",
+            "billing_interval": "MONTHLY",
+            "interval_count": 1,
+            "base_price": 500.0,
+        },
+    )
+    plan_id = plan_resp.json()["id"]
+    today = datetime.date.today()
+
+    q_resp = client.post(
+        "/api/v1/quotations/",
+        headers=staff_headers,
+        json={
+            "customer_id": str(customer.id),
+            "plan_id": plan_id,
+            "start_date": today.isoformat(),
+            "lines": [{"line_type": "PLAN_FEE", "description": "Base Fee", "unit_price": 500.0, "quantity": 1}],
+        },
+    )
+    quote_id = q_resp.json()["id"]
+    client.post(f"/api/v1/quotations/{quote_id}/status", headers=staff_headers, json={"status": "SENT"})
+    client.post(f"/api/v1/quotations/{quote_id}/status", headers=staff_headers, json={"status": "CONFIRMED"})
+
+    sub_resp = client.post(
+        f"/api/v1/subscriptions/from-quotation/{quote_id}",
+        headers=staff_headers,
+        json={"start_date": today.isoformat()},
+    )
+    sub_id = sub_resp.json()["id"]
+    inv_resp = client.post(f"/api/v1/invoices/from-subscription/{sub_id}", headers=staff_headers)
+    inv_id = inv_resp.json()["id"]
+
+    # 1. Test CREDIT_CARD rejection with HTTP 422
+    invalid_resp = client.post(
+        "/api/v1/payments/",
+        headers=staff_headers,
+        json={
+            "invoice_id": inv_id,
+            "amount": 200.0,
+            "payment_method": "CREDIT_CARD",
+        },
+    )
+    assert invalid_resp.status_code == 422
+    error_detail = invalid_resp.json()["detail"]
+    assert any("payment_method" in str(d) for d in error_detail)
+
+    # 2. Test CARD success with HTTP 201
+    valid_resp = client.post(
+        "/api/v1/payments/",
+        headers=staff_headers,
+        json={
+            "invoice_id": inv_id,
+            "amount": 200.0,
+            "payment_method": "CARD",
+            "reference_number": "CC-AUTH-9999",
+            "notes": "Payment via Credit Card (CARD)",
+        },
+    )
+    assert valid_resp.status_code == 201
+    pay_data = valid_resp.json()
+    assert pay_data["payment_method"] == "CARD"
+    assert pay_data["status"] == "SUCCESS"
+    assert Decimal(str(pay_data["amount"])) == Decimal("200.00")

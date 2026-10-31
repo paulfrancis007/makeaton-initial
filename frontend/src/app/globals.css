@@ -3,12 +3,86 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #F7F3E8;
+  --foreground: #171717;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--background);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background-color: #FFE45C;
+  color: #171717;
+}
+
+/* Neo-Brutalist utility base classes */
+.nb-card {
+  background-color: #ffffff;
+  border: 2.5px solid #171717;
+  box-shadow: 4px 4px 0px #171717;
+}
+
+.nb-card-sm {
+  background-color: #ffffff;
+  border: 2px solid #171717;
+  box-shadow: 2.5px 2.5px 0px #171717;
+}
+
+.nb-btn {
+  border: 2px solid #171717;
+  box-shadow: 3px 3px 0px #171717;
+  font-weight: 700;
+  transition: all 0.15s ease-in-out;
+}
+.nb-btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 4.5px 4.5px 0px #171717;
+}
+.nb-btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #171717;
+}
+
+.nb-btn-primary {
+  background-color: #FFE45C;
+  color: #171717;
+}
+
+.nb-btn-secondary {
+  background-color: #4563EB;
+  color: #ffffff;
+}
+
+.nb-btn-accent {
+  background-color: #FF7058;
+  color: #ffffff;
+}
+
+.nb-btn-white {
+  background-color: #ffffff;
+  color: #171717;
+}
+
+.nb-input {
+  background-color: #ffffff;
+  border: 2px solid #171717;
+  font-weight: 500;
+  color: #171717;
+  transition: all 0.15s ease-in-out;
+}
+.nb-input:focus {
+  outline: none;
+  box-shadow: 3px 3px 0px #171717;
+}
+
+.nb-badge {
+  border: 1.5px solid #171717;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 1.5px 1.5px 0px #171717;
 }

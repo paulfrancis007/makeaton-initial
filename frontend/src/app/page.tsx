@@ -8,13 +8,11 @@ import {
   FileText,
   Repeat,
   ArrowRight,
-  Shield,
   Building2,
   CreditCard,
   LayoutDashboard,
   ShieldAlert,
   UserCheck,
-  Play,
   LogIn,
 } from "lucide-react";
 
@@ -26,7 +24,7 @@ export default function HomePage() {
       href: "/admin/dashboard",
       icon: LayoutDashboard,
       badge: "Dashboard",
-      color: "from-indigo-600 to-blue-600",
+      accentBg: "bg-nb-yellow",
     },
     {
       title: "Invoices & Recurring Billing",
@@ -34,7 +32,7 @@ export default function HomePage() {
       href: "/admin/invoices",
       icon: Receipt,
       badge: "Billing",
-      color: "from-blue-600 to-cyan-600",
+      accentBg: "bg-nb-blue text-white",
     },
     {
       title: "Payments & Settlements",
@@ -42,7 +40,7 @@ export default function HomePage() {
       href: "/admin/payments",
       icon: CreditCard,
       badge: "Payments",
-      color: "from-emerald-600 to-teal-600",
+      accentBg: "bg-nb-green",
     },
     {
       title: "Customer Self-Service Portal",
@@ -50,7 +48,7 @@ export default function HomePage() {
       href: "/portal/dashboard",
       icon: UserCheck,
       badge: "Customer Portal",
-      color: "from-purple-600 to-indigo-600",
+      accentBg: "bg-nb-purple",
     },
     {
       title: "Subscription Lifecycle",
@@ -58,7 +56,7 @@ export default function HomePage() {
       href: "/admin/subscriptions",
       icon: Repeat,
       badge: "Lifecycle",
-      color: "from-teal-600 to-emerald-600",
+      accentBg: "bg-nb-coral text-white",
     },
     {
       title: "Quotation Management",
@@ -66,7 +64,7 @@ export default function HomePage() {
       href: "/admin/quotations",
       icon: FileText,
       badge: "Sales",
-      color: "from-amber-500 to-orange-600",
+      accentBg: "bg-nb-yellow",
     },
     {
       title: "Product Catalogue",
@@ -74,7 +72,7 @@ export default function HomePage() {
       href: "/admin/products",
       icon: Package,
       badge: "Catalog",
-      color: "from-indigo-500 to-blue-600",
+      accentBg: "bg-nb-blue text-white",
     },
     {
       title: "Subscription Plans",
@@ -82,7 +80,7 @@ export default function HomePage() {
       href: "/admin/plans",
       icon: Layers,
       badge: "Plans",
-      color: "from-blue-600 to-cyan-600",
+      accentBg: "bg-nb-green",
     },
     {
       title: "Tax Rules & Exclusions",
@@ -90,7 +88,7 @@ export default function HomePage() {
       href: "/admin/taxes",
       icon: Receipt,
       badge: "Taxes",
-      color: "from-emerald-600 to-teal-600",
+      accentBg: "bg-nb-coral text-white",
     },
     {
       title: "Discount Engine",
@@ -98,7 +96,7 @@ export default function HomePage() {
       href: "/admin/discounts",
       icon: Percent,
       badge: "Discounts",
-      color: "from-purple-600 to-indigo-600",
+      accentBg: "bg-nb-purple",
     },
     {
       title: "System Audit Trail",
@@ -106,7 +104,7 @@ export default function HomePage() {
       href: "/admin/audit",
       icon: ShieldAlert,
       badge: "Admin Only",
-      color: "from-slate-700 to-slate-900",
+      accentBg: "bg-nb-dark text-white",
     },
     {
       title: "Sign In / Role Switcher",
@@ -114,101 +112,112 @@ export default function HomePage() {
       href: "/login",
       icon: LogIn,
       badge: "Auth",
-      color: "from-rose-600 to-pink-600",
+      accentBg: "bg-nb-pink",
     },
   ];
 
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col justify-between p-6 sm:p-12 lg:p-16 max-w-7xl mx-auto space-y-12">
-      {/* Top Header */}
-      <header className="border-b border-slate-200 pb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-semibold tracking-wider uppercase text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-              Stages 11–18 Complete • Enterprise Platform Ready
+    <div className="min-h-screen bg-cream text-nb-dark selection:bg-nb-yellow selection:text-nb-dark p-4 sm:p-8 lg:p-12">
+      <div className="max-w-7xl mx-auto space-y-10">
+        {/* Top Hero Banner */}
+        <header className="bg-white border-2 sm:border-3 border-nb-dark p-6 sm:p-8 shadow-nb-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 bg-nb-yellow border-2 border-nb-dark px-3 py-1 text-xs font-black uppercase tracking-wider shadow-nb-sm">
+              <span className="h-2.5 w-2.5 bg-nb-dark animate-pulse" />
+              Production Ready • Neo-Brutalist Architecture
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight flex items-center gap-3">
+              <div className="h-12 w-12 bg-nb-coral border-2 border-nb-dark flex items-center justify-center text-white shadow-nb-sm">
+                <Building2 className="h-7 w-7 stroke-[2.5]" />
+              </div>
+              Brightloop
+            </h1>
+            <p className="text-sm font-bold text-zinc-700 max-w-2xl leading-relaxed">
+              Enterprise Subscription Management, Automated Recurring Billing Engine, Tax Snapshotting & Ledger Settlement System.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:items-end gap-3">
+            <Link
+              href="/login"
+              className="nb-btn nb-btn-primary inline-flex items-center justify-center gap-2 px-5 py-3 text-xs sm:text-sm font-black uppercase tracking-wider"
+            >
+              <LogIn className="h-4 w-4 stroke-[2.5]" />
+              Sign In / Role Switcher
+            </Link>
+            <div className="text-xs font-bold border-2 border-nb-dark p-2.5 bg-cream shadow-nb-sm">
+              <div className="text-[10px] uppercase font-black tracking-wider text-zinc-600">REST API Gateway:</div>
+              <code className="text-nb-dark font-mono font-bold">http://localhost:8000/api/v1</code>
+            </div>
+          </div>
+        </header>
+
+        {/* Modules Section */}
+        <section className="space-y-6">
+          <div className="border-b-2 border-nb-dark pb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-black uppercase tracking-tight">
+                Operations & Management Consoles
+              </h2>
+              <p className="text-xs font-bold text-zinc-600 mt-1">
+                Unified role-based interfaces with real-time PostgreSQL persistence.
+              </p>
+            </div>
+            <span className="hidden sm:inline-block px-3 py-1 bg-white border-2 border-nb-dark font-black text-xs uppercase shadow-nb-sm">
+              12 Active Modules
             </span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mt-2 flex items-center gap-3">
-            <Building2 className="h-8 w-8 text-indigo-600" />
-            Brightloop
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Enterprise Subscription Management, Recurring Billing Engine & Financial Ledger
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 text-white font-semibold text-xs shadow-sm hover:bg-indigo-700 transition"
-          >
-            <LogIn className="h-4 w-4" /> Sign In / Quick Demo Switch
-          </Link>
-          <div className="text-xs text-slate-500 border border-slate-200 rounded-lg p-2.5 bg-white shadow-xs hidden sm:block">
-            <div className="font-medium text-slate-700">API Gateway:</div>
-            <code className="text-indigo-600 font-mono">http://localhost:8000/api/v1</code>
-          </div>
-        </div>
-      </header>
 
-      {/* Modules Launchpad */}
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-xl font-bold text-slate-900">
-            Platform Capabilities & Operations Consoles
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Role-tailored interfaces for Administrators, Staff, and Customer Self-Service.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {coreModules.map((mod) => {
-            const Icon = mod.icon;
-            return (
-              <Link
-                key={mod.href + mod.title}
-                href={mod.href}
-                className="group relative bg-white border border-slate-200 rounded-2xl p-6 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all duration-200 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div
-                      className={`h-10 w-10 rounded-xl bg-gradient-to-tr ${mod.color} flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform`}
-                    >
-                      <Icon className="h-5 w-5" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {coreModules.map((mod) => {
+              const Icon = mod.icon;
+              return (
+                <Link
+                  key={mod.href + mod.title}
+                  href={mod.href}
+                  className="group bg-white border-2 sm:border-3 border-nb-dark p-6 shadow-nb hover:shadow-nb-lg hover:-translate-x-1 hover:-translate-y-1 transition-all duration-150 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div
+                        className={`h-12 w-12 border-2 border-nb-dark flex items-center justify-center shadow-nb-sm ${mod.accentBg}`}
+                      >
+                        <Icon className="h-6 w-6 stroke-[2.5]" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-wider bg-white border-2 border-nb-dark px-2.5 py-0.5 shadow-nb-sm">
+                        {mod.badge}
+                      </span>
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                      {mod.badge}
-                    </span>
+                    <h3 className="text-lg font-black uppercase tracking-tight group-hover:text-nb-blue transition-colors">
+                      {mod.title}
+                    </h3>
+                    <p className="text-xs font-bold text-zinc-600 mt-2 leading-relaxed">
+                      {mod.description}
+                    </p>
                   </div>
-                  <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition">
-                    {mod.title}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    {mod.description}
-                  </p>
-                </div>
 
-                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center text-xs font-semibold text-indigo-600 group-hover:text-indigo-700">
-                  Open Console
-                  <ArrowRight className="h-3.5 w-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+                  <div className="mt-6 pt-4 border-t-2 border-nb-dark flex items-center justify-between text-xs font-black uppercase tracking-wider">
+                    <span>Open Console</span>
+                    <div className="h-6 w-6 bg-nb-yellow border-2 border-nb-dark flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-nb-sm">
+                      <ArrowRight className="h-3.5 w-3.5 stroke-[2.5]" />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
-        <p>
-          Brightloop • Synchronous PostgreSQL 16 + SQLAlchemy 2.x • Psycopg 3 • Next.js 15
-        </p>
-        <p className="font-mono text-slate-400">
-          Precision: Numeric(12,2) • Strict Overpayment Rejection • Banker&apos;s Rounding
-        </p>
-      </footer>
-    </main>
+        {/* Footer */}
+        <footer className="border-2 sm:border-3 border-nb-dark bg-white p-6 shadow-nb flex flex-col sm:flex-row items-center justify-between text-xs font-black uppercase tracking-wider gap-4">
+          <p className="text-zinc-700">
+            Brightloop • Synchronous PostgreSQL 16 + SQLAlchemy 2.x • Psycopg 3 • Next.js
+          </p>
+          <p className="font-mono bg-cream px-3 py-1 border-2 border-nb-dark shadow-nb-sm">
+            NUMERIC(12,2) • BANKER&apos;S ROUNDING • GI-ST EXCLUSIONS
+          </p>
+        </footer>
+      </div>
+    </div>
   );
 }
