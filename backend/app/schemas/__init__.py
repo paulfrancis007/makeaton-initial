@@ -19,6 +19,29 @@ from app.schemas.customer import (
 )
 from app.schemas.audit import AuditLogPublic
 from app.schemas.common import PaginatedResponse
+from app.schemas.catalog import (
+    ProductCreate,
+    ProductPublic,
+    ProductUpdate,
+    ProductVariantCreate,
+    ProductVariantPublic,
+    ProductVariantUpdate,
+    PlanCreate,
+    PlanPublic,
+    PlanUpdate,
+    TaxRuleCreate,
+    TaxRulePublic,
+    TaxRuleUpdate,
+    TaxAssignmentRequest,
+)
+from app.schemas.discount import (
+    DiscountRuleCreate,
+    DiscountRulePublic,
+    DiscountRuleUpdate,
+    DiscountEvaluationRequest,
+    DiscountEvaluationResponse,
+    DiscountItemInput,
+)
 
 __all__ = [
     "UserLogin",
@@ -38,4 +61,23 @@ __all__ = [
     "CustomerUserPublic",
     "AuditLogPublic",
     "PaginatedResponse",
+    "ProductCreate",
+    "ProductPublic",
+    "ProductUpdate",
+    "ProductVariantCreate",
+    "ProductVariantPublic",
+    "ProductVariantUpdate",
+    "PlanCreate",
+    "PlanPublic",
+    "PlanUpdate",
+    "TaxRuleCreate",
+    "TaxRulePublic",
+    "TaxRuleUpdate",
+    "TaxAssignmentRequest",
+    "DiscountRuleCreate",
+    "DiscountRulePublic",
+    "DiscountRuleUpdate",
+    "DiscountEvaluationRequest",
+    "DiscountEvaluationResponse",
+    "DiscountItemInput",
 ]
