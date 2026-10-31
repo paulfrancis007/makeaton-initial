@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from app.core.config import settings
 from app.db.session import check_db_health
+from app.api.v1.api import api_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -23,6 +24,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include v1 API Routers
+app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 
 class HealthResponse(BaseModel):
