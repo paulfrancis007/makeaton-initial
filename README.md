@@ -10,9 +10,9 @@ It manages the complete recurring lifecycle:
 ## Architecture Overview
 
 - **Frontend:** Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, Lucide Icons
-- **Backend:** Python FastAPI, Pydantic v2, Uvicorn, Pytest
-- **Database:** PostgreSQL 16 (configured via Docker Compose)
-- **Object Relational Mapper:** SQLAlchemy 2.0 & Alembic (introduced in Stage 3)
+- **Backend:** Python FastAPI, Pydantic v2, Synchronous SQLAlchemy 2.x, Psycopg 3, Uvicorn, Pytest
+- **Database:** PostgreSQL 16 (configured via Docker Compose) with `btree_gist` extension
+- **Financial Ledger Invariant:** Pure `NUMERIC(12, 2)` currency amounts, Banker's Rounding (half-even), strict database check constraints (`chk_invoices_total_calc`), non-overlapping billing exclusion constraints (`excl_invoice_no_overlapping_periods`), row-level concurrency locking (`SELECT ... FOR UPDATE`), strict overpayment rejection, and atomic one-way payment voiding.
 
 ---
 
@@ -22,21 +22,28 @@ It manages the complete recurring lifecycle:
 makeaton-initial/
 ├── frontend/                   # Next.js App Router application
 │   ├── src/app/                # Page routes, layouts, and styles
-│   ├── public/                 # Static assets
-│   ├── package.json            # Node.js dependencies
-│   ├── tsconfig.json           # TypeScript configuration
-│   ├── tailwind.config.ts      # Tailwind CSS configuration
-│   └── .env.example            # Frontend environment variables template
+│   │   ├── admin/              # Admin/Staff consoles (Dashboard, Invoices, Payments, etc.)
+│   │   ├── portal/             # Customer self-service portal
+│   │   └── login/              # Multi-role authentication & demo credentials
+│   ├── src/components/         # Reusable UI components & Navbar
+│   ├── src/lib/                # API client & Auth context
+│   └── package.json            # Node.js dependencies
 ├── backend/                    # FastAPI application
 │   ├── app/                    # Application source code
-│   │   ├── core/               # Configuration settings (Pydantic Settings)
-│   │   └── main.py             # FastAPI entry point, CORS, and health check
-│   ├── tests/                  # Pytest test suite
+│   │   ├── api/v1/             # Versioned REST API endpoints
+│   │   ├── core/               # Configuration settings (Pydantic Settings, Security)
+│   │   ├── db/                 # Database engine & session management
+│   │   ├── models/             # SQLAlchemy ORM entity models
+│   │   ├── schemas/            # Pydantic validation schemas
+│   │   └── services/           # Business logic, billing engine, PDF, & email
+│   ├── scripts/                # Standalone CLI tools (seed_demo_data.py, run_billing.py)
+│   ├── tests/                  # Pytest test suite (80 unit, integration, & security tests)
 │   ├── requirements.txt        # Python backend dependencies
-│   └── .env.example            # Backend environment variables template
+│   └── alembic/                # Database migrations
 ├── docker-compose.yml          # PostgreSQL 16 local database container
-├── .gitignore                  # Git ignore rules
-├── .env.example                # Root environment template
+├── docs/                       # Comprehensive documentation
+│   ├── database-design.md      # Authoritative database architecture
+│   └── demo-walkthrough.md     # 16-step evaluator walkthrough
 ├── AGENTS.md                   # Persistent agent and development guidelines
 ├── BUILD_GUIDE.md              # 18-stage implementation blueprint
 └── README.md                   # Setup and execution guide
@@ -47,8 +54,8 @@ makeaton-initial/
 ## Local Development Setup (Windows PowerShell)
 
 ### Prerequisites
-- **Node.js:** v20+ LTS (Tested on Node `v24.22.1`, npm `11.19.1`)
-- **Python:** 3.12 or 3.13 (Tested on Python `3.13.5`)
+- **Node.js:** v20+ LTS
+- **Python:** 3.12 or 3.13 (Virtual environment recommended)
 - **Docker Desktop:** Docker engine with Docker Compose enabled
 
 ---
@@ -67,87 +74,90 @@ Verify the container is running and healthy:
 docker compose ps
 ```
 
-To stop the database:
-```powershell
-docker compose down
-```
-
 ---
 
 ### 2. Backend Setup & Startup (FastAPI)
 
-1. Open PowerShell in the project root:
+1. Open PowerShell in the `backend/` directory:
 ```powershell
-cd C:\QuartusProjects\makeaton-initial\backend
+cd backend
 ```
 
-2. Create the Python virtual environment using the existing Python installation:
-```powershell
-python -m venv .venv
-```
-
-3. Activate the virtual environment:
+2. Activate the virtual environment:
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
-*(If PowerShell restricts script execution, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned` in your current terminal session).*
 
-4. Install backend dependencies:
+3. Run database migrations:
 ```powershell
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+.\.venv\Scripts\python -m alembic upgrade head
 ```
 
-5. Run backend tests:
+4. Seed rich demo data (idempotent):
 ```powershell
-$env:PYTHONPATH="."
-python -m pytest tests -v
+.\.venv\Scripts\python scripts/seed_demo_data.py
+```
+
+5. Run full automated test suite (80 tests against `brightloop_test`):
+```powershell
+.\.venv\Scripts\python -m pytest tests -v
 ```
 
 6. Start the FastAPI development server:
 ```powershell
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 The backend is now accessible:
 - **Root API:** [http://localhost:8000/](http://localhost:8000/)
 - **Health Check Endpoint:** [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)
-- **Interactive OpenAPI Documentation:** [http://localhost:8000/api/v1/docs](http://localhost:8000/api/v1/docs)
+- **Interactive OpenAPI Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
 ### 3. Frontend Setup & Startup (Next.js)
 
-1. Open a new PowerShell window in the frontend directory:
+1. Open a new PowerShell window in the `frontend/` directory:
 ```powershell
-cd C:\QuartusProjects\makeaton-initial\frontend
+cd frontend
 ```
 
-2. Copy the environment template if needed:
+2. Run Next.js production build verification:
 ```powershell
-Copy-Item .env.example .env.local
+npm run build
 ```
 
-3. Install frontend dependencies:
-```powershell
-npm install
-```
-
-4. Start the Next.js development server:
+3. Start the Next.js development server:
 ```powershell
 npm run dev
 ```
 
-The frontend will be running at:
+The application is now running at:
 - **Application Portal:** [http://localhost:3000](http://localhost:3000)
+- **Login / Role Quick Switcher:** [http://localhost:3000/login](http://localhost:3000/login)
 
 ---
 
-## Stage Verification Matrix
+### 4. Scheduled Billing Runner (CLI / Task Scheduler)
 
-| Component | Target URL | Expected Output |
-|---|---|---|
-| **Frontend UI** | `http://localhost:3000` | Brightloop Stage 1 Foundation page with architecture status and role specifications |
-| **Backend Health** | `http://localhost:8000/api/v1/health` | `{"status":"ok","service":"Brightloop API","version":"1.0.0","environment":"development"}` |
-| **API Docs** | `http://localhost:8000/api/v1/docs` | Swagger UI displaying general and health endpoints |
-| **PostgreSQL** | `127.0.0.1:5432` | PostgreSQL 16 ready for connections (`brightloop_dev` database, bound strictly to loopback) |
+Execute the idempotent recurring billing engine:
+
+```powershell
+cd backend
+.\.venv\Scripts\python scripts/run_billing.py --batch-size 100
+```
+
+---
+
+## Pre-Configured Demo Credentials
+
+The login page (`/login`) includes quick-fill buttons for instant evaluation:
+
+| Role | Email Address | Password | Intended Capabilities |
+| :--- | :--- | :--- | :--- |
+| **Administrator** | `admin@brightloop.local` | `AdminPass123!` | Full control: catalog, plans, taxes, discounts, users, audit log, billing runs, voids. |
+| **Operations Staff** | `staff1@brightloop.local` | `StaffPass123!` | Operational workflows: quotations, subscriptions, invoices, payment recording. |
+| **Customer (Acme)** | `customer@acme.local` | `CustomerPass123!` | Self-service portal: subscription status, invoice PDF downloads, payment receipts. |
+| **Customer (Global Dynamics)** | `billing@globaldynamics.local` | `CustomerPass123!` | Self-service portal: overdue receivables, past-due invoices, settlement history. |
+
+See [docs/demo-walkthrough.md](docs/demo-walkthrough.md) for the complete 16-step evaluation walkthrough.
