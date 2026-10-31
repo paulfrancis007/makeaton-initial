@@ -488,3 +488,313 @@ export const subscriptionApi = {
   close: (id: string, reason?: string) =>
     request<Subscription>(`/subscriptions/${id}/close`, { method: "POST", body: JSON.stringify({ reason }) }),
 };
+
+
+// -------------------------------------------------------------
+// User & Auth Types & API
+// -------------------------------------------------------------
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  role: "ADMIN" | "STAFF" | "CUSTOMER";
+  is_active: boolean;
+}
+
+export interface InvoiceLineTax {
+  id: string;
+  invoice_line_id: string;
+  tax_rule_id: string | null;
+  tax_name_snapshot: string;
+  tax_rate_snapshot: string;
+  tax_amount: string;
+}
+
+export interface InvoiceLine {
+  id: string;
+  invoice_id: string;
+  line_type: "PLAN_FEE" | "PRODUCT";
+  product_id: string | null;
+  product_name?: string | null;
+  variant_id: string | null;
+  plan_name?: string | null;
+  description: string;
+  quantity: number;
+  unit_price: string;
+  tax_rate: string;
+  tax_amount: string;
+  discount_amount: string;
+  line_total: string;
+  total_amount?: string;
+  taxes: InvoiceLineTax[];
+}
+
+export interface Payment {
+  id: string;
+  payment_number: string;
+  invoice_id: string;
+  customer_id: string;
+  customer_name?: string | null;
+  invoice_number?: string | null;
+  amount: string;
+  payment_method: "CASH" | "BANK_TRANSFER" | "UPI" | "CARD" | "CHEQUE" | "OTHER";
+  status: "SUCCESS" | "VOIDED";
+  payment_date: string;
+  reference_number?: string | null;
+  notes?: string | null;
+  voided_at?: string | null;
+  voided_by_user_id?: string | null;
+  void_reason?: string | null;
+  recorded_by_user_id: string;
+  created_at: string;
+}
+
+export interface Invoice {
+  id: string;
+  invoice_number: string;
+  subscription_id: string;
+  customer_id: string;
+  customer_name?: string | null;
+  subscription_number?: string | null;
+  status: "DRAFT" | "CONFIRMED" | "PARTIALLY_PAID" | "PAID" | "CANCELLED";
+  issue_date: string;
+  due_date: string;
+  billing_period_start: string;
+  billing_period_end: string;
+  period_start?: string;
+  period_end?: string;
+  subtotal_amount: string;
+  discount_amount: string;
+  tax_amount: string;
+  rounding_adjustment: string;
+  total_amount: string;
+  amount_paid: string;
+  balance_due: string;
+  currency: string;
+  notes?: string | null;
+  is_overdue: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvoiceDetail extends Invoice {
+  lines: InvoiceLine[];
+  payments: Payment[];
+}
+
+export interface AdminDashboardData {
+  metrics: {
+    total_customers: number;
+    active_customers: number;
+    total_subscriptions: number;
+    active_subscriptions: number;
+    total_invoiced: number;
+    total_collected: number;
+    total_outstanding: number;
+    overdue_amount: number;
+    invoices_count: number;
+    overdue_invoices_count: number;
+  };
+  recent_invoices: Array<{
+    id: string;
+    invoice_number: string;
+    customer_name?: string | null;
+    total_amount: number;
+    balance_due: number;
+    status: string;
+    issue_date: string;
+  }>;
+  recent_payments: Array<{
+    id: string;
+    payment_number: string;
+    payment_date: string;
+    payment_method: string;
+    amount: number;
+    status: string;
+  }>;
+}
+
+export interface CustomerDashboardData {
+  customer: {
+    id: string;
+    company_name: string;
+  };
+  metrics: {
+    active_subscriptions: number;
+    total_subscriptions: number;
+    outstanding_balance: number;
+    total_paid: number;
+    unpaid_invoices_count: number;
+  };
+  subscriptions: Array<{
+    id: string;
+    subscription_number: string;
+    start_date: string;
+    next_billing_date?: string | null;
+    status: string;
+  }>;
+  recent_invoices: Array<{
+    id: string;
+    invoice_number: string;
+    due_date: string;
+    total_amount: number;
+    status: string;
+  }>;
+  recent_payments: Array<{
+    id: string;
+    payment_number: string;
+    payment_date: string;
+    payment_method: string;
+    amount: number;
+    status: string;
+  }>;
+}
+
+export interface AuditLog {
+  id: string;
+  actor_user_id?: string | null;
+  action: string;
+  entity_name: string;
+  entity_id?: string | null;
+  ip_address?: string | null;
+  details: Record<string, any>;
+  created_at: string;
+}
+
+export const authApi = {
+  login: async (email: string, password: string): Promise<{ access_token: string; token_type: string }> => {
+    return request<{ access_token: string; token_type: string }>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+  },
+  getCurrentUser: async (): Promise<User> => {
+    return request<User>("/auth/me");
+  },
+};
+
+export const invoiceApi = {
+  listInvoices: (params?: {
+    customer_id?: string;
+    subscription_id?: string;
+    status?: string;
+    overdue_only?: boolean;
+    is_overdue?: boolean;
+    search?: string;
+    page?: number;
+    size?: number;
+    page_size?: number;
+  }) => {
+    const query = new URLSearchParams();
+    if (params?.customer_id) query.append("customer_id", params.customer_id);
+    if (params?.subscription_id) query.append("subscription_id", params.subscription_id);
+    if (params?.status) query.append("status", params.status);
+    if (params?.overdue_only || params?.is_overdue) query.append("overdue_only", "true");
+    if (params?.search) query.append("search", params.search);
+    if (params?.page) query.append("page", String(params.page));
+    const s = params?.size || params?.page_size;
+    if (s) query.append("size", String(s));
+    return request<PaginatedResult<Invoice>>(`/invoices/?${query.toString()}`);
+  },
+  getInvoice: (id: string) => request<InvoiceDetail>(`/invoices/${id}`),
+  createFromSubscription: (subscriptionId: string, billingDate?: string) => {
+    const query = billingDate ? `?billing_date=${billingDate}` : "";
+    return request<InvoiceDetail>(`/invoices/from-subscription/${subscriptionId}${query}`, { method: "POST" });
+  },
+  runBilling: (dataOrDate?: string | { billing_date?: string; run_date?: string; batch_size?: number }, batchSize?: number) => {
+    let billingDate: string | null = null;
+    let bSize = 100;
+    if (typeof dataOrDate === "string") {
+      billingDate = dataOrDate;
+      if (batchSize) bSize = batchSize;
+    } else if (dataOrDate && typeof dataOrDate === "object") {
+      billingDate = dataOrDate.billing_date || dataOrDate.run_date || null;
+      if (dataOrDate.batch_size) bSize = dataOrDate.batch_size;
+    }
+    return request<any>("/invoices/run-billing", {
+      method: "POST",
+      body: JSON.stringify({ billing_date: billingDate, batch_size: bSize }),
+    });
+  },
+  cancel: (id: string, reason?: string) => {
+    const query = reason ? `?reason=${encodeURIComponent(reason)}` : "";
+    return request<Invoice>(`/invoices/${id}/cancel${query}`, { method: "POST" });
+  },
+  cancelInvoice: (id: string, reason?: string) => {
+    const query = reason ? `?reason=${encodeURIComponent(reason)}` : "";
+    return request<Invoice>(`/invoices/${id}/cancel${query}`, { method: "POST" });
+  },
+  getPdfUrl: (id: string) => `${API_BASE_URL}/invoices/${id}/pdf`,
+  downloadPdf: async (id: string): Promise<Blob> => {
+    const token = getStoredToken();
+    const headers: Record<string, string> = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const res = await fetch(`${API_BASE_URL}/invoices/${id}/pdf`, { headers });
+    if (!res.ok) throw new Error("Failed to download PDF invoice");
+    return res.blob();
+  },
+  sendEmail: (id: string, recipientEmail?: string) => {
+    const query = recipientEmail ? `?recipient_email=${encodeURIComponent(recipientEmail)}` : "";
+    return request<{ sent?: boolean; status?: string; recipient?: string; message?: string }>(
+      `/invoices/${id}/send-email${query}`,
+      { method: "POST" }
+    );
+  },
+};
+
+export const paymentApi = {
+  listPayments: (params?: { invoice_id?: string; customer_id?: string; status?: string; payment_method?: string; method?: string; page?: number; size?: number; page_size?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.invoice_id) query.append("invoice_id", params.invoice_id);
+    if (params?.customer_id) query.append("customer_id", params.customer_id);
+    if (params?.status) query.append("status", params.status);
+    const m = params?.payment_method || params?.method;
+    if (m) query.append("payment_method", m);
+    if (params?.page) query.append("page", String(params.page));
+    const s = params?.size || params?.page_size;
+    if (s) query.append("size", String(s));
+    return request<PaginatedResult<Payment>>(`/payments/?${query.toString()}`);
+  },
+  getPayment: (id: string) => request<Payment>(`/payments/${id}`),
+  recordPayment: (data: { invoice_id: string; amount: number | string; payment_method: string; reference_number?: string; notes?: string }) => {
+    return request<Payment>("/payments/", { method: "POST", body: JSON.stringify(data) });
+  },
+  createPayment: (data: { invoice_id: string; amount: number | string; payment_method: string; reference_number?: string; notes?: string }) => {
+    return request<Payment>("/payments/", { method: "POST", body: JSON.stringify(data) });
+  },
+  voidPayment: (id: string, void_reason: string) => {
+    return request<Payment>(`/payments/${id}/void`, { method: "POST", body: JSON.stringify({ void_reason }) });
+  },
+};
+
+export const dashboardApi = {
+  getAdminDashboard: (startDate?: string, endDate?: string) => {
+    const query = new URLSearchParams();
+    if (startDate) query.append("start_date", startDate);
+    if (endDate) query.append("end_date", endDate);
+    return request<any>(`/dashboard/admin?${query.toString()}`);
+  },
+  getStaffDashboard: () => request<any>("/dashboard/staff"),
+  getCustomerDashboard: () => request<any>("/dashboard/customer"),
+};
+
+export const auditApi = {
+  listAuditLogs: (params?: { action?: string; entity_name?: string; page?: number; size?: number; page_size?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.action) query.append("action", params.action);
+    if (params?.entity_name) query.append("entity_name", params.entity_name);
+    if (params?.page) query.append("page", String(params.page));
+    const s = params?.size || params?.page_size;
+    if (s) query.append("size", String(s));
+    return request<PaginatedResult<AuditLog>>(`/audit/?${query.toString()}`);
+  },
+  listLogs: (params?: { action?: string; entity_name?: string; page?: number; size?: number; page_size?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.action) query.append("action", params.action);
+    if (params?.entity_name) query.append("entity_name", params.entity_name);
+    if (params?.page) query.append("page", String(params.page));
+    const s = params?.size || params?.page_size;
+    if (s) query.append("size", String(s));
+    return request<PaginatedResult<AuditLog>>(`/audit/?${query.toString()}`);
+  },
+};
